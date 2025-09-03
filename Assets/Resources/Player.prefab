@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 1904443121470452756}
   - component: {fileID: 3171151158835500998}
   - component: {fileID: 1939406972282974464}
-  - component: {fileID: -4737353575953548934}
   - component: {fileID: -1372068633809437720}
+  - component: {fileID: 3526068601943539251}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -108,24 +108,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-4737353575953548934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3882145305442695276}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85236eac5c2a04fe1be158baf8e4c10a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lastAppliedInputs:
-    X: 0
-    Y: 0
-    Tick: 0
-  Rigidbody: {fileID: -1372068633809437720}
-  serverStateTransform: {fileID: 8431386471470972881}
 --- !u!54 &-1372068633809437720
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -135,8 +117,8 @@ Rigidbody:
   m_GameObject: {fileID: 3882145305442695276}
   serializedVersion: 4
   m_Mass: 50
-  m_Drag: 0.3
-  m_AngularDrag: 0.3
+  m_Drag: 0
+  m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -151,8 +133,66 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &3526068601943539251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3882145305442695276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c53d6e1dc3684b64b291ad85f5ad344, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lastAppliedInputs:
+    X: 0
+    Y: 0
+    Jump: 0
+    Tick: 0
+  Rigidbody: {fileID: -1372068633809437720}
+  serverStateTransform: {fileID: 8431386471470972881}
+  jumpForce: 100
+  maxSpeed: 5
+  maxAcceleration: 250
+  reverseAccelerationMultiplierCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  springDistance: 1
+  springForce: 2500
+  springDamping: 250
 --- !u!1 &9144625914240021106
 GameObject:
   m_ObjectHideFlags: 0
