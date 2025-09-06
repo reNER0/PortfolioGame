@@ -1,30 +1,26 @@
 using UnityEngine;
 
-public class Player : PhysicsObject
+public class PlayerWalkingState : PlayerState
 {
-    [SerializeField]
-    private float jumpForce;
-    [SerializeField]
-    private float maxSpeed;
-    [SerializeField]
-    private float maxAcceleration;
-    [SerializeField]
-    private AnimationCurve reverseAccelerationMultiplierCurve;
-
-    [SerializeField]
-    private float springDistance;
-    [SerializeField]
-    private float springForce;
-    [SerializeField]
-    private float springDamping;
-
     private float lastDistance;
     private bool isGrounded;
     private Vector3 currentVelocity;
 
 
-    // same as FixedUpdate
-    public override void Input(PlayerInputs playerInputs)
+    public PlayerWalkingState(Player player) : base(player) { }
+
+
+    public override void OnEnter()
+    {
+
+    }
+
+    public override void OnUpdate()
+    {
+        _player.Animator.SetFloat("Speed", _player.Rigidbody.velocity.magnitude / _player.MaxSpeed);
+    }
+
+    public override void OnInput(PlayerInputs playerInputs)
     {
         ApplySpringForce();
         ApplyMoveForce(playerInputs.X, playerInputs.Y);
@@ -32,34 +28,40 @@ public class Player : PhysicsObject
         ApplyJumpForce(playerInputs.Jump);
     }
 
+    public override void OnExit()
+    {
+
+    }
+
+
     private void ApplySpringForce()
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, -transform.up, out hit, springDistance))
+        if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance + 1))
         {
             isGrounded = true;
         }
         else
         {
-            lastDistance = springDistance;
+            lastDistance = _player.SpringDistance;
             isGrounded = false;
         }
-        
+
 
         if (isGrounded)
         {
-            var springOffset = springDistance - hit.distance;
-            var springForceToApply = springOffset * springForce;
+            var springOffset = _player.SpringDistance - hit.distance;
+            var springForceToApply = springOffset * _player.SpringForce;
 
             var springDeltaPerTick = lastDistance - hit.distance;
             var springDelta = springDeltaPerTick / Time.fixedDeltaTime;
 
-            var springDampToApply = springDelta * springDamping;
+            var springDampToApply = springDelta * _player.SpringDamping;
 
             var forceToApply = springForceToApply + springDampToApply;
 
-            Rigidbody.AddForce(Vector3.up * forceToApply);
+            _player.Rigidbody.AddForce(Vector3.up * forceToApply);
 
             lastDistance = hit.distance;
 
@@ -76,20 +78,22 @@ public class Player : PhysicsObject
 
         var moveDirection = cameraForward * y + cameraRight * x;
 
-        var targetVelocity = moveDirection * maxSpeed;
+        moveDirection = Vector3.ClampMagnitude(moveDirection, 1);
 
-        var velocity = Rigidbody.velocity;
+        var targetVelocity = moveDirection * _player.MaxSpeed;
+
+        var velocity = _player.Rigidbody.velocity;
         velocity.y = 0;
 
         var dotVector = Vector3.Dot(moveDirection, velocity.normalized);
 
-        var acceleration = maxAcceleration * reverseAccelerationMultiplierCurve.Evaluate(dotVector);
+        var acceleration = _player.MaxAcceleration * _player.ReverseAccelerationMultiplierCurve.Evaluate(dotVector);
 
         currentVelocity = Vector3.MoveTowards(velocity, targetVelocity, acceleration * Time.fixedDeltaTime);
 
         var accelerationToApply = (currentVelocity - velocity) / Time.fixedDeltaTime;
 
-        Rigidbody.AddForce(accelerationToApply * Rigidbody.mass);
+        _player.Rigidbody.AddForce(accelerationToApply * _player.Rigidbody.mass);
     }
 
     private void Rotate(float x, float y)
@@ -97,12 +101,12 @@ public class Player : PhysicsObject
         if (x == 0 && y == 0)
             return;
 
-        Vector3 targetDir = Rigidbody.velocity;
+        Vector3 targetDir = _player.Rigidbody.velocity;
 
         targetDir.y = 0f;
 
         Quaternion targetRot = Quaternion.LookRotation(targetDir);
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRot, maxAcceleration * Time.fixedDeltaTime);
+        _player.transform.rotation = Quaternion.Lerp(_player.transform.rotation, targetRot, _player.MaxAcceleration * Time.fixedDeltaTime);
     }
 
     private void ApplyJumpForce(bool jump)
@@ -110,6 +114,6 @@ public class Player : PhysicsObject
         if (!jump)
             return;
 
-        Rigidbody.AddForce(Vector3.up * jumpForce * Rigidbody.mass, ForceMode.Impulse);
+        _player.Rigidbody.AddForce(Vector3.up * _player.JumpForce * _player.Rigidbody.mass, ForceMode.Impulse);
     }
 }

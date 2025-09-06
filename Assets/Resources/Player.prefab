@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: -1372068633809437720}
   - component: {fileID: 5062852049563006378}
   - component: {fileID: 3526068601943539251}
-  - component: {fileID: 3671760473965875707}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -145,20 +144,6 @@ MonoBehaviour:
   springDistance: 1.09
   springForce: 7500
   springDamping: 1000
---- !u!114 &3671760473965875707
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3882145305442695276}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9652bc08346a24c34a684fe5ceadf6a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 3526068601943539251}
-  animator: {fileID: 8254770487752510845}
 --- !u!1001 &2586266492485857516
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -255,12 +240,6 @@ PrefabInstance:
 --- !u!4 &2625311410063677191 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 88426ed9f9be2422a8915cb963dd0e78,
-    type: 3}
-  m_PrefabInstance: {fileID: 2586266492485857516}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &8254770487752510845 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 88426ed9f9be2422a8915cb963dd0e78,
     type: 3}
   m_PrefabInstance: {fileID: 2586266492485857516}
   m_PrefabAsset: {fileID: 0}

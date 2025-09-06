@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,6 +16,6 @@ public class SharedSceneManager : MonoBehaviour
         SceneManager.LoadScene(serverScene, LoadSceneMode.Additive);
 #else
         SceneManager.LoadScene(clientScene, LoadSceneMode.Additive);
-#endif    
+#endif
     }
 }
