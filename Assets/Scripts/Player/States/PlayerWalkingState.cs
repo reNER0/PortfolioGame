@@ -7,6 +7,9 @@ public class PlayerWalkingState : PlayerState
     private Vector3 currentVelocity;
 
 
+    private bool isJumped;
+
+
     public PlayerWalkingState(Player player) : base(player) { }
 
 
@@ -22,10 +25,21 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnInput(PlayerInputs playerInputs)
     {
-        ApplySpringForce();
+        if (_player.Rigidbody.velocity.y < 0)
+            isJumped = false;
+
+        if (!isJumped)
+            ApplySpringForce();
+
         ApplyMoveForce(playerInputs.X, playerInputs.Y);
+
         Rotate(playerInputs.X, playerInputs.Y);
-        ApplyJumpForce(playerInputs.Jump);
+
+        if(isGrounded && playerInputs.Jump)
+            Jump();
+
+        if (!isGrounded)
+            ApplyAdditiveGravity();
     }
 
     public override void OnExit()
@@ -38,7 +52,7 @@ public class PlayerWalkingState : PlayerState
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance + 1))
+        if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance))
         {
             isGrounded = true;
         }
@@ -109,11 +123,17 @@ public class PlayerWalkingState : PlayerState
         _player.transform.rotation = Quaternion.Lerp(_player.transform.rotation, targetRot, _player.MaxAcceleration * Time.fixedDeltaTime);
     }
 
-    private void ApplyJumpForce(bool jump)
+    private void Jump()
     {
-        if (!jump)
-            return;
+        isJumped = true;
+        isGrounded = false;
+        lastDistance = _player.SpringDistance;
 
         _player.Rigidbody.AddForce(Vector3.up * _player.JumpForce * _player.Rigidbody.mass, ForceMode.Impulse);
+    }
+
+    private void ApplyAdditiveGravity()
+    {
+        _player.Rigidbody.AddForce(Vector3.down * _player.AdditiveGravity, ForceMode.Acceleration);
     }
 }

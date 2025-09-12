@@ -15,6 +15,8 @@ public class Player : PhysicsObject
     private float maxAcceleration;
     [SerializeField]
     private AnimationCurve reverseAccelerationMultiplierCurve;
+    [SerializeField]
+    private float additiveGravity;
 
     [SerializeField]
     private float springDistance;
@@ -30,6 +32,7 @@ public class Player : PhysicsObject
     public float SpringForce => springForce;
     public float SpringDamping => springDamping;
     public AnimationCurve ReverseAccelerationMultiplierCurve => reverseAccelerationMultiplierCurve;
+    public float AdditiveGravity => additiveGravity;
 
 
 
