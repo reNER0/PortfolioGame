@@ -8,5 +8,6 @@ public abstract class PlayerState : State
     }
 
     public abstract void OnInput(PlayerInputs playerInputs);
+    public virtual void OnAnimatorIK() { }
 }
 

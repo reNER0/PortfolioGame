@@ -19,6 +19,11 @@ public class PlayerStateMachine : MonoBehaviour
         currentState?.OnUpdate();
     }
 
+    private void OnAnimatorIK(int layerIndex)
+    {
+        currentState?.OnAnimatorIK();
+    }
+
     public void OnInput(PlayerInputs playerInputs)
     {
         currentState?.OnInput(playerInputs);

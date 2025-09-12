@@ -21,6 +21,45 @@ public class PlayerWalkingState : PlayerState
     public override void OnUpdate()
     {
         _player.Animator.SetFloat("Speed", _player.Rigidbody.velocity.magnitude / _player.MaxSpeed);
+
+    }
+
+    public override void OnAnimatorIK()
+    {
+        if (!_player.UseIK)
+            return;
+
+        SetLegIK(AvatarIKGoal.LeftFoot);
+        SetLegIK(AvatarIKGoal.RightFoot);
+    }
+
+    private void SetLegIK(AvatarIKGoal avatarIKGoal)
+    {
+        float ikWeight = 0;
+
+        switch (avatarIKGoal)
+        {
+            case AvatarIKGoal.LeftFoot:
+                ikWeight = _player.Animator.GetFloat("LeftFootIKWeight");
+                break;
+            case AvatarIKGoal.RightFoot:
+                ikWeight = _player.Animator.GetFloat("RightFootIKWeight");
+                break;
+        }
+
+        _player.Animator.SetIKPositionWeight(avatarIKGoal, ikWeight);
+        _player.Animator.SetIKRotationWeight(avatarIKGoal, ikWeight);
+
+        var startingPoint = _player.Animator.GetIKPosition(avatarIKGoal);
+        startingPoint.y = _player.transform.position.y + 1;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(startingPoint, Vector3.down, out hit, _player.SpringDistance, _player.WalkableLayerMask))
+        {
+            _player.Animator.SetIKPosition(avatarIKGoal, hit.point + hit.normal * _player.LegsIKOffset);
+            _player.Animator.SetIKRotation(avatarIKGoal, Quaternion.LookRotation(_player.transform.forward, hit.normal));
+        }
     }
 
     public override void OnInput(PlayerInputs playerInputs)

@@ -19,6 +19,13 @@ public class Player : PhysicsObject
     private float additiveGravity;
 
     [SerializeField]
+    private bool useIK;
+    [SerializeField]
+    private float legsIKOffset;
+    [SerializeField]
+    private LayerMask walkableLayerMask;
+
+    [SerializeField]
     private float springDistance;
     [SerializeField]
     private float springForce;
@@ -33,16 +40,19 @@ public class Player : PhysicsObject
     public float SpringDamping => springDamping;
     public AnimationCurve ReverseAccelerationMultiplierCurve => reverseAccelerationMultiplierCurve;
     public float AdditiveGravity => additiveGravity;
+    public bool UseIK => useIK;
+    public float LegsIKOffset => legsIKOffset;
+    public LayerMask WalkableLayerMask => walkableLayerMask;
 
 
 
 
     private void Awake()
     {
-        PlayerStateMachine = gameObject.AddComponent<PlayerStateMachine>();
-        PlayerStateMachine.ChangeState(new PlayerWalkingState(this));
-        
         Animator = GetComponentInChildren<Animator>();
+
+        PlayerStateMachine = Animator.gameObject.AddComponent<PlayerStateMachine>();
+        PlayerStateMachine.ChangeState(new PlayerWalkingState(this));
     }
 
     // same as FixedUpdate
