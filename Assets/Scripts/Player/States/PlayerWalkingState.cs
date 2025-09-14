@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 public class PlayerWalkingState : PlayerState
@@ -7,7 +8,7 @@ public class PlayerWalkingState : PlayerState
     private Vector3 currentVelocity;
 
 
-    private bool isJumped;
+    private bool isJumped = true;
 
 
     public PlayerWalkingState(Player player) : base(player) { }
@@ -20,11 +21,14 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnUpdate()
     {
-        _player.Animator.SetFloat("Speed", _player.Rigidbody.velocity.magnitude / _player.MaxSpeed);
+        Vector3 localVelocity = _player.transform.InverseTransformDirection(_player.Rigidbody.velocity);
 
+        _player.Animator.SetFloat("VelocityX", localVelocity.x / _player.MaxSpeed);
+        _player.Animator.SetFloat("VelocityY", localVelocity.z / _player.MaxSpeed);
+        _player.Animator.SetBool("IsGrounded", isGrounded);
     }
 
-    public override void OnAnimatorIK()
+    public override void OnAnimatorIK(int layer)
     {
         if (!_player.UseIK)
             return;
@@ -62,9 +66,30 @@ public class PlayerWalkingState : PlayerState
         }
     }
 
+    public override void OnCollisionEnter(Collision collision)
+    {
+        var car = collision.gameObject.GetComponent<Car>();
+
+        if (car == null)
+            return;
+
+        var seat = car.GetNearestSeat(_player.transform.position);
+
+        if (seat == null)
+            return;
+
+        var carId = NetworkRepository.NetworkObjectById.First(x => x.Predictable == car).Id;
+        var seatId = car.GetSeatId(seat);
+
+        var jumpInCarCmd = new JumpInCarCmd(NetworkRepository.CurrentObjectId, carId, seatId);
+
+        NetworkBus.OnPerformCommand?.Invoke(jumpInCarCmd);
+        //NetworkBus.OnCommandSendToServer?.Invoke(jumpInCarCmd);
+    }
+
     public override void OnInput(PlayerInputs playerInputs)
     {
-        if (_player.Rigidbody.velocity.y < 0)
+        if (_player.Rigidbody.velocity.y <= 0)
             isJumped = false;
 
         if (!isJumped)
@@ -140,7 +165,7 @@ public class PlayerWalkingState : PlayerState
 
         var dotVector = Vector3.Dot(moveDirection, velocity.normalized);
 
-        var acceleration = _player.MaxAcceleration * _player.ReverseAccelerationMultiplierCurve.Evaluate(dotVector);
+        var acceleration = (isGrounded ? _player.MaxAcceleration : _player.AirAcceleration) * _player.ReverseAccelerationMultiplierCurve.Evaluate(dotVector);
 
         currentVelocity = Vector3.MoveTowards(velocity, targetVelocity, acceleration * Time.fixedDeltaTime);
 

@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public abstract class PlayerState : State
 {
     protected Player _player;
@@ -8,6 +10,8 @@ public abstract class PlayerState : State
     }
 
     public abstract void OnInput(PlayerInputs playerInputs);
-    public virtual void OnAnimatorIK() { }
+
+    public virtual void OnAnimatorIK(int layer) { }
+    public virtual void OnCollisionEnter(Collision collision) { }
 }
 

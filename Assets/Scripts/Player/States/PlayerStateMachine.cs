@@ -21,7 +21,12 @@ public class PlayerStateMachine : MonoBehaviour
 
     private void OnAnimatorIK(int layerIndex)
     {
-        currentState?.OnAnimatorIK();
+        currentState?.OnAnimatorIK(layerIndex);
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        currentState?.OnCollisionEnter(collision);
     }
 
     public void OnInput(PlayerInputs playerInputs)
