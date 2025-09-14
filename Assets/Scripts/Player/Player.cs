@@ -14,6 +14,8 @@ public class Player : PhysicsObject
     [SerializeField]
     private float maxAcceleration;
     [SerializeField]
+    private float airAcceleration;
+    [SerializeField]
     private AnimationCurve reverseAccelerationMultiplierCurve;
     [SerializeField]
     private float additiveGravity;
@@ -34,6 +36,7 @@ public class Player : PhysicsObject
 
     public float MaxSpeed => maxSpeed;
     public float MaxAcceleration => maxAcceleration;
+    public float AirAcceleration => airAcceleration;
     public float JumpForce => jumpForce;
     public float SpringDistance => springDistance;
     public float SpringForce => springForce;
@@ -43,7 +46,6 @@ public class Player : PhysicsObject
     public bool UseIK => useIK;
     public float LegsIKOffset => legsIKOffset;
     public LayerMask WalkableLayerMask => walkableLayerMask;
-
 
 
 
@@ -64,22 +66,6 @@ public class Player : PhysicsObject
 
     private void OnCollisionEnter(Collision collision)
     {
-        var car = collision.gameObject.GetComponent<Car>();
-
-        if (car == null)
-            return;
-
-        var seat = car.GetNearestSeat(transform.position);
-
-        if (seat == null)
-            return;
-
-        var carId = NetworkRepository.NetworkObjectById.First(x => x.Predictable == car).Id;
-        var seatId = car.GetSeatId(seat);
-
-        var jumpInCarCmd = new JumpInCarCmd(NetworkRepository.CurrentObjectId, carId, seatId);
-
-        NetworkBus.OnPerformCommand?.Invoke(jumpInCarCmd);
-        NetworkBus.OnCommandSendToServer?.Invoke(jumpInCarCmd);
+        PlayerStateMachine.OnCollisionEnter(collision);
     }
 }
