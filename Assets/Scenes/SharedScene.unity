@@ -417,13 +417,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upperMount: {fileID: 968994517}
   camera: {fileID: 1215744963}
-  speed: 0
   height: 2
   angle: 20
   distance: 10
-  inertia: 0
-  inertiaDistance: 0
-  cameraTurnSpeed: 0
+  cameraTurnSpeed: 2
+  cameraTurnSpeedMultiplier:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -1
+      value: 2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!4 &567271716
 Transform:
   m_ObjectHideFlags: 0
