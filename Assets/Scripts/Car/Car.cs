@@ -11,6 +11,22 @@ public class Car : PhysicsObject
     private Wheel[] wheels;
     [SerializeField]
     private WheelSteering[] wheelSteerings;
+    [SerializeField]
+    private Transform steeringWheel;
+    [SerializeField]
+    private float steeringWheelAngle;
+    [SerializeField]
+    private Transform centerOfMass;
+
+
+    private Quaternion steeringWheelStartRotation;
+
+
+    private void Awake()
+    {
+        Rigidbody.centerOfMass = centerOfMass.localPosition;
+        steeringWheelStartRotation = steeringWheel.localRotation;
+    }
 
     // same as FixedUpdate
     public override void Input(PlayerInputs playerInputs)
@@ -20,6 +36,9 @@ public class Car : PhysicsObject
 
         foreach (var wheelSteering in wheelSteerings)
             wheelSteering.Process(playerInputs.X);
+
+        steeringWheel.localRotation = steeringWheelStartRotation;
+        steeringWheel.Rotate(steeringWheel.forward, steeringWheelAngle * playerInputs.X);
     }
 
     public Seat GetNearestSeat(Vector3 position)
