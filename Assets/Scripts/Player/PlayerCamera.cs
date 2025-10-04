@@ -27,6 +27,9 @@ public class PlayerCamera : Singleton<PlayerCamera>
 
     private void FixedUpdate()
     {
+        if (player == null)
+            return;
+
         upperMount.localPosition = Vector3.up * height;
         upperMount.localEulerAngles = new Vector3(angle, 0, 0);
         camera.localPosition = Vector3.back * distance;
