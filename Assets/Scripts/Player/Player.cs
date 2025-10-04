@@ -57,6 +57,7 @@ public class Player : PhysicsObject
         PlayerStateMachine.ChangeState(new PlayerWalkingState(this));
     }
 
+
     // same as FixedUpdate
     public override void Input(PlayerInputs playerInputs)
     {
@@ -67,5 +68,53 @@ public class Player : PhysicsObject
     private void OnCollisionEnter(Collision collision)
     {
         PlayerStateMachine.OnCollisionEnter(collision);
+    }
+
+
+    public override void UpdateState(PredictableState state)
+    {
+        if (PlayerStateMachine.currentState.GetType() == typeof(PlayerDrivingState))
+            return;
+
+        var serverState = state as RigidbodyState;
+
+        if (serverState == null)
+        {
+            Debug.LogError("Error while applying server predictable state!");
+            return;
+        }
+
+
+        if (!NetworkRepository.IsCurrentClientOwnerOfObject(this))
+        {
+            Rigidbody.MovePosition(serverState.Position);
+            Rigidbody.MoveRotation(serverState.Rotation);
+            Rigidbody.velocity = serverState.Velocity;
+            Rigidbody.angularVelocity = serverState.RotationVelocity;
+            return;
+        }
+
+
+        serverStateTransform.position = serverState.Position;
+        serverStateTransform.rotation = serverState.Rotation;
+
+
+        var localState = States.FirstOrDefault(x => x?.Tick == serverState.Tick);
+
+        if (localState == null)
+        {
+            //Debug.LogWarning($"Client received server state with tick {serverState.Tick}, " +
+            //    $"but clients last state tick was {States.Where(x => x != null)?.OrderByDescending(x => x.Tick).First().Tick}");
+            return;
+        }
+
+        var error = (serverState.Position - (localState as RigidbodyState).Position).magnitude;
+
+        if (error >= NetworkSettings.MaximumError)
+        {
+            Reconcilate(serverState);
+
+            return;
+        }
     }
 }
