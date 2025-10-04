@@ -6,7 +6,7 @@ public class PredictablesSyncOnStart : MonoBehaviour
     private void Awake()
     {
         var predictables = FindObjectsOfType<Predictable>()
-                                 .OrderBy(p => p.transform.GetSiblingIndex())
+                                 .OrderBy(p => p.name)
                                  .ToArray();
 
         foreach (var predictable in predictables)
