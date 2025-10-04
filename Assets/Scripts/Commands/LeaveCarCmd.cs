@@ -29,6 +29,18 @@ public class LeaveCarCmd : SerializableClass, ICommand
 
         var player = (Player)NetworkRepository.NetworkObjectById.First(x => x.Id == _playerId).Predictable;
 
+        bool isSender = senderId == NetworkRepository.CurrentCliendId;
+
+        if (NetworkRepository.IsServer)
+        {
+            var sender = NetworkRepository.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
+            NetworkBus.OnCommandSendToClientsExcept(this, sender);
+        }
+        else if (isSender)
+        {
+            NetworkBus.OnCommandSendToServer?.Invoke(this);
+        }
+
         seat.SetPlayer(null);
         player.PlayerStateMachine.ChangeState(new PlayerWalkingState(player));
     }
