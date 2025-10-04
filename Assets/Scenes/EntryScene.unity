@@ -151,7 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0a518fe108e74a688072da6643a9b1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverScene: SharedScene
+  sharedScene: SharedScene
+  serverScene: ServerScene
   clientScene: MainMenuScene
 --- !u!4 &593186443
 Transform:

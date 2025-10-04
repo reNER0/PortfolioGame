@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerStateMachine : MonoBehaviour
 {
-    private PlayerState currentState;
+    public PlayerState currentState { get; private set; }
 
 
     public void ChangeState(PlayerState state)
@@ -32,5 +32,10 @@ public class PlayerStateMachine : MonoBehaviour
     public void OnInput(PlayerInputs playerInputs)
     {
         currentState?.OnInput(playerInputs);
+    }
+
+    public virtual Vector2 GetInputDirectionOverride(Vector2 input)
+    {
+        return currentState?.GetInputDirectionOverride(input) ?? Vector2.zero;
     }
 }

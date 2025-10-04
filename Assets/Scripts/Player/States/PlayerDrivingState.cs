@@ -80,7 +80,6 @@ public class PlayerDrivingState : PlayerState
         var leaveCar = new LeaveCarCmd(NetworkRepository.CurrentObjectId, NetworkRepository.NetworkObjectById.First(x => x.Predictable == _car).Id, _car.GetSeatId(_seat));
 
         NetworkBus.OnPerformCommand?.Invoke(leaveCar);
-        //NetworkBus.OnCommandSendToServer?.Invoke(leaveCar);
     }
 
     public override void OnExit()

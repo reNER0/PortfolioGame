@@ -1,4 +1,6 @@
 using System.Linq;
+using Assets.Scripts.Network.Commands;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class PlayerWalkingState : PlayerState
@@ -84,7 +86,6 @@ public class PlayerWalkingState : PlayerState
         var jumpInCarCmd = new JumpInCarCmd(NetworkRepository.CurrentObjectId, carId, seatId);
 
         NetworkBus.OnPerformCommand?.Invoke(jumpInCarCmd);
-        //NetworkBus.OnCommandSendToServer?.Invoke(jumpInCarCmd);
     }
 
     public override void OnInput(PlayerInputs playerInputs)
@@ -148,6 +149,7 @@ public class PlayerWalkingState : PlayerState
 
     private void ApplyMoveForce(float x, float y)
     {
+        /*
         var camera = Camera.main;
 
         var cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
@@ -155,6 +157,8 @@ public class PlayerWalkingState : PlayerState
 
 
         var moveDirection = cameraForward * y + cameraRight * x;
+        */
+        var moveDirection = Vector3.forward * y + Vector3.right * x;
 
         moveDirection = Vector3.ClampMagnitude(moveDirection, 1);
 
@@ -199,5 +203,18 @@ public class PlayerWalkingState : PlayerState
     private void ApplyAdditiveGravity()
     {
         _player.Rigidbody.AddForce(Vector3.down * _player.AdditiveGravity, ForceMode.Acceleration);
+    }
+
+
+    public override Vector2 GetInputDirectionOverride(Vector2 input)
+    {
+        var camera = Camera.main;
+
+        var cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+        var cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+
+        var overrideDirection = cameraForward * input.y + cameraRight * input.x;
+
+        return new Vector2(overrideDirection.x, overrideDirection.z);
     }
 }

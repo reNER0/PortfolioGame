@@ -13,5 +13,10 @@ public abstract class PlayerState : State
 
     public virtual void OnAnimatorIK(int layer) { }
     public virtual void OnCollisionEnter(Collision collision) { }
+
+    public virtual Vector2 GetInputDirectionOverride(Vector2 input)
+    {
+        return input;
+    }
 }
 
