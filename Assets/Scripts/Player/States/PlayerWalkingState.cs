@@ -70,6 +70,9 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnCollisionEnter(Collision collision)
     {
+        if (!NetworkRepository.IsCurrentClientOwnerOfObject(_player))
+            return;
+
         var car = collision.gameObject.GetComponent<Car>();
 
         if (car == null)

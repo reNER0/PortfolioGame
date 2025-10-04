@@ -74,6 +74,9 @@ public class PlayerDrivingState : PlayerState
     {
         _car.Input(playerInputs);
 
+        if (!NetworkRepository.IsCurrentClientOwnerOfObject(_player))
+            return;
+
         if (!playerInputs.Jump)
             return;
 
