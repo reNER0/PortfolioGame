@@ -103,5 +103,7 @@ public class Car : PhysicsObject
 
             return;
         }
+
+        SmoothSync(localState as RigidbodyState, serverState);
     }
 }
