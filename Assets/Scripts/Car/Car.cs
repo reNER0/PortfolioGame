@@ -31,6 +31,8 @@ public class Car : PhysicsObject
     // same as FixedUpdate
     public override void Input(PlayerInputs playerInputs)
     {
+        base.Input(playerInputs);
+
         foreach (var wheel in wheels)
             wheel.Process(playerInputs.Y);
 

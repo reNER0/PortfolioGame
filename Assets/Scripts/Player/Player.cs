@@ -61,6 +61,8 @@ public class Player : PhysicsObject
     // same as FixedUpdate
     public override void Input(PlayerInputs playerInputs)
     {
+        base.Input(playerInputs);
+
         PlayerStateMachine.OnInput(playerInputs);
     }
 
