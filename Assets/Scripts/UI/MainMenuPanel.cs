@@ -1,16 +1,8 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenuPanel : MonoBehaviour
 {
-    [SerializeField]
-    private string sharedScene;
-    [SerializeField]
-    private string serverScene;
-    [SerializeField]
-    private string clientScene;
-
     [SerializeField]
     private Button singlePlayerButton;
     [SerializeField]
@@ -29,14 +21,12 @@ public class MainMenuPanel : MonoBehaviour
 
     private void OnSinglePlayerButton()
     {
-        SceneManager.LoadScene(sharedScene);
-        SceneManager.LoadScene(serverScene, LoadSceneMode.Additive);
+        SceneLoader.LoadClientScene();
     }
 
     private void OnMultiPlayerButton()
     {
-        SceneManager.LoadScene(sharedScene);
-        SceneManager.LoadScene(clientScene, LoadSceneMode.Additive);
+        SceneLoader.LoadServerScene();
     }
 
     private void OnExitButton()
