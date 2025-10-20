@@ -21,12 +21,12 @@ public class MainMenuPanel : MonoBehaviour
 
     private void OnSinglePlayerButton()
     {
-        SceneLoader.LoadClientScene();
+        SceneLoader.LoadHostScene();
     }
 
     private void OnMultiPlayerButton()
     {
-        SceneLoader.LoadServerScene();
+        SceneLoader.LoadClientScene();
     }
 
     private void OnExitButton()

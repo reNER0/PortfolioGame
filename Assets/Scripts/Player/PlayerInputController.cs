@@ -26,7 +26,12 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
-        var player = (Player)NetworkRepository.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.CurrentObjectId).Predictable;
+        var playerObject = NetworkRepository.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.CurrentObjectId);
+
+        if (playerObject == null)
+            return;
+
+        var player = (Player)playerObject.Predictable;
 
         if (player == null)
             return;
