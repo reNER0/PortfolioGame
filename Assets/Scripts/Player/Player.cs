@@ -118,5 +118,7 @@ public class Player : PhysicsObject
 
             return;
         }
+
+        SmoothSync(localState as RigidbodyState, serverState);
     }
 }
