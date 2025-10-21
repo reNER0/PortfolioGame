@@ -21,13 +21,13 @@ public class MainState : State
     {
         Debug.Log("Waiting for players...");
 
-        NetworkBus.OnClientConnected += CheckForReady;
+        NetworkBus.OnClientConnected += SpawnPlayer;
         NetworkBus.OnClientDisconnected += DestroyPlayer;
 
         if (!spawnServerPlayer)
             return;
 
-        SpawnPlayer();
+        SpawnPlayer(null);
     }
 
     public override void OnUpdate()
@@ -37,7 +37,7 @@ public class MainState : State
 
     public override void OnExit()
     {
-        NetworkBus.OnClientConnected -= CheckForReady;
+        NetworkBus.OnClientConnected -= SpawnPlayer;
         NetworkBus.OnClientDisconnected -= DestroyPlayer;
     }
 
@@ -47,16 +47,11 @@ public class MainState : State
         var destroyPlayerCmd = new DestroyCmd(client.ClientObjectId);
 
         NetworkBus.OnPerformCommand?.Invoke(destroyPlayerCmd);
+        NetworkBus.OnCommandSendToClients?.Invoke(destroyPlayerCmd);
     }
 
 
-    private void CheckForReady(NetworkClient client)
-    {
-        SpawnPlayer(client);
-    }
-
-
-    private void SpawnPlayer(NetworkClient client = null)
+    private void SpawnPlayer(NetworkClient client)
     {
         var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(NetworkRepository.CurrentCliendId);
 
