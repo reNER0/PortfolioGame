@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SharedScene.unity
     guid: b1bf32469d2ff4d98aae61361f324bf5
+  - enabled: 1
+    path: Assets/Scenes/HostScene.unity
+    guid: c3216f5c0448f41ef8a50ff03c19b130
   m_configObjects: {}

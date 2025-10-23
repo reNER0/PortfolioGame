@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Assets.Scripts.Network.Commands;
 using UnityEditor.Rendering;
@@ -5,8 +6,12 @@ using UnityEngine;
 
 public class PlayerWalkingState : PlayerState
 {
+    private DateTime creationTime = DateTime.Now;
+    private float sleepTime = 1 / 2f;
+
     private float lastDistance;
-    private bool isGrounded;
+    private bool isGrounded = false;
+    private bool firstGroundTouch = false;
     private Vector3 currentVelocity;
 
 
@@ -18,7 +23,7 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnEnter()
     {
-
+        lastDistance = _player.SpringDistance;
     }
 
     public override void OnUpdate()
@@ -93,26 +98,36 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnInput(PlayerInputs playerInputs)
     {
-        if (_player.Rigidbody.velocity.y <= 0)
-            isJumped = false;
-
-        if (!isJumped)
-            ApplySpringForce();
 
         ApplyMoveForce(playerInputs.X, playerInputs.Y);
 
         Rotate(playerInputs.X, playerInputs.Y);
 
-        if(isGrounded && playerInputs.Jump)
+        if (isGrounded && playerInputs.Jump)
             Jump();
 
         if (!isGrounded)
             ApplyAdditiveGravity();
+
+        if (!IsSleepTimeElapsed())
+            return;
+
+        if (_player.Rigidbody.velocity.y <= 0)
+            isJumped = false;
+
+        if (!isJumped)
+            ApplySpringForce();
     }
 
     public override void OnExit()
     {
 
+    }
+
+
+    private bool IsSleepTimeElapsed()
+    {
+        return (DateTime.Now - creationTime).TotalSeconds > sleepTime;
     }
 
 
@@ -152,15 +167,6 @@ public class PlayerWalkingState : PlayerState
 
     private void ApplyMoveForce(float x, float y)
     {
-        /*
-        var camera = Camera.main;
-
-        var cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
-        var cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-
-
-        var moveDirection = cameraForward * y + cameraRight * x;
-        */
         var moveDirection = Vector3.forward * y + Vector3.right * x;
 
         moveDirection = Vector3.ClampMagnitude(moveDirection, 1);

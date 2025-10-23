@@ -773,6 +773,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d2a1ce583f24f32b8d9a6f70f30e40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0

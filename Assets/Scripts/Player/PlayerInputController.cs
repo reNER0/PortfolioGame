@@ -45,25 +45,25 @@ public class PlayerInputController : MonoBehaviour
 
             var input = new PlayerInputs(moveDirection.x, moveDirection.y, jump, previewTick);
 
-            // Client prediction
-            if (!NetworkRepository.IsServer)
-            {
-                player.Input(input);
-
-                // Maybe extrapolate other players here
-
-                if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
-                {
-                    Physics.Simulate(Time.fixedDeltaTime);
-                }
-
-                player.SaveCurrentState(previewTick);
-                NetworkBus.OnAllStatesSaved?.Invoke(previewTick);
-            }
+            jump = false;
 
             NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
 
-            jump = false;
+            // Client prediction
+            if (NetworkRepository.IsServer)
+                return;
+
+            player.Input(input);
+
+            // Maybe extrapolate other players here
+
+            if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
+            {
+                Physics.Simulate(Time.fixedDeltaTime);
+            }
+
+            player.SaveCurrentState(previewTick);
+            NetworkBus.OnAllStatesSaved?.Invoke(previewTick);
         }
     }
 
