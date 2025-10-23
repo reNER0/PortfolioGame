@@ -34,11 +34,14 @@ public class JumpInCarCmd : SerializableClass, ICommand
 
         if (NetworkRepository.IsServer)
         {
-            var sender = NetworkRepository.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
-
-            // Verify
-            if (!isSender)
+            if (isSender) // If Host - Send to clients
             {
+                NetworkBus.OnCommandSendToClients(this);
+            }
+            else // If Server - Verify
+            {
+                var sender = NetworkRepository.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
+
                 var distanceBetweebPlayerAndSeat = Vector3.Distance(seat.transform.position, player.transform.position);
 
                 var canSeat = distanceBetweebPlayerAndSeat < seat.SeatableRadius;
@@ -49,9 +52,9 @@ public class JumpInCarCmd : SerializableClass, ICommand
                     NetworkBus.OnCommandSendToClient?.Invoke(leaveCarCmd, sender);
                     return;
                 }
-            }
 
-            NetworkBus.OnCommandSendToClientsExcept(this, sender);
+                NetworkBus.OnCommandSendToClientsExcept(this, sender);
+            }
         }
         else if (isSender)
         {

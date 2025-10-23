@@ -33,8 +33,15 @@ public class LeaveCarCmd : SerializableClass, ICommand
 
         if (NetworkRepository.IsServer)
         {
-            var sender = NetworkRepository.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
-            NetworkBus.OnCommandSendToClientsExcept(this, sender);
+            if (isSender)
+            {
+                NetworkBus.OnCommandSendToClients(this);
+            }
+            else
+            {
+                var sender = NetworkRepository.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
+                NetworkBus.OnCommandSendToClientsExcept(this, sender);
+            }
         }
         else if (isSender)
         {
