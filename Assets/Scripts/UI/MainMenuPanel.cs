@@ -4,27 +4,27 @@ using UnityEngine.UI;
 public class MainMenuPanel : MonoBehaviour
 {
     [SerializeField]
-    private Button singlePlayerButton;
+    private Button hostButton;
     [SerializeField]
-    private Button multiPlayerButton;
+    private Button clientButton;
     [SerializeField]
     private Button exitButton;
 
 
     private void Awake()
     {
-        singlePlayerButton.onClick.AddListener(OnSinglePlayerButton);
-        multiPlayerButton.onClick.AddListener(OnMultiPlayerButton);
+        hostButton.onClick.AddListener(OnHostButton);
+        clientButton.onClick.AddListener(OnClientButton);
         exitButton.onClick.AddListener(OnExitButton);
     }
 
 
-    private void OnSinglePlayerButton()
+    private void OnHostButton()
     {
         SceneLoader.LoadHostScene();
     }
 
-    private void OnMultiPlayerButton()
+    private void OnClientButton()
     {
         SceneLoader.LoadClientScene();
     }
