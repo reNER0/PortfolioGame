@@ -17,6 +17,9 @@ public class PlayerWalkingState : PlayerState
 
     private bool isJumped = true;
 
+    private Rigidbody standingRigidbody;
+    private RaycastHit hit;
+
 
     public PlayerWalkingState(Player player) : base(player) { }
 
@@ -28,7 +31,12 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnUpdate()
     {
-        Vector3 localVelocity = _player.transform.InverseTransformDirection(_player.Rigidbody.velocity);
+        var velocity = _player.Rigidbody.velocity;
+
+        if (standingRigidbody != null)
+            velocity -= standingRigidbody.velocity;
+
+        Vector3 localVelocity = _player.transform.InverseTransformDirection(velocity);
 
         _player.Animator.SetFloat("VelocityX", localVelocity.x / _player.MaxSpeed);
         _player.Animator.SetFloat("VelocityY", localVelocity.z / _player.MaxSpeed);
@@ -133,16 +141,18 @@ public class PlayerWalkingState : PlayerState
 
     private void ApplySpringForce()
     {
-        RaycastHit hit;
-
         if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance))
         {
             isGrounded = true;
+
+            standingRigidbody = hit.rigidbody;
         }
         else
         {
             lastDistance = _player.SpringDistance;
             isGrounded = false;
+
+            standingRigidbody = null;
         }
 
 
@@ -159,9 +169,9 @@ public class PlayerWalkingState : PlayerState
             var forceToApply = springForceToApply + springDampToApply;
 
             _player.Rigidbody.AddForce(Vector3.up * forceToApply);
+            standingRigidbody?.AddForceAtPosition(Vector3.down * forceToApply, hit.point);
 
             lastDistance = hit.distance;
-
         }
     }
 
@@ -173,8 +183,13 @@ public class PlayerWalkingState : PlayerState
 
         var targetVelocity = moveDirection * _player.MaxSpeed;
 
+        if (standingRigidbody != null)
+            targetVelocity += standingRigidbody.velocity;
+
         var velocity = _player.Rigidbody.velocity;
+
         velocity.y = 0;
+        targetVelocity.y = 0;
 
         var dotVector = Vector3.Dot(moveDirection, velocity.normalized);
 
@@ -185,6 +200,7 @@ public class PlayerWalkingState : PlayerState
         var accelerationToApply = (currentVelocity - velocity) / Time.fixedDeltaTime;
 
         _player.Rigidbody.AddForce(accelerationToApply * _player.Rigidbody.mass);
+        standingRigidbody?.AddForceAtPosition(-accelerationToApply * _player.Rigidbody.mass, hit.point);
     }
 
     private void Rotate(float x, float y)
@@ -193,6 +209,9 @@ public class PlayerWalkingState : PlayerState
             return;
 
         Vector3 targetDir = _player.Rigidbody.velocity;
+
+        if (standingRigidbody != null)
+            targetDir -= standingRigidbody.velocity;
 
         targetDir.y = 0f;
 
