@@ -240,7 +240,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 47950283}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91342bcec7fc64b03bf818b1c911cee5, type: 3}
+  m_Script: {fileID: 11500000, guid: 0faca6daa2eba5b4d896eba2b85ba7f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _port: 25565
@@ -269,7 +269,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 197702764}
-  - component: {fileID: 197702763}
+  - component: {fileID: 197702765}
   m_Layer: 0
   m_Name: GameStateMachine
   m_TagString: Untagged
@@ -277,19 +277,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &197702763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 197702762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e79684ccc5f0414c9ee80595517e4e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startingState: {fileID: 11400000, guid: de85624b82c514004b36023e6d711c16, type: 2}
 --- !u!4 &197702764
 Transform:
   m_ObjectHideFlags: 0
@@ -305,6 +292,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &197702765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 197702762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 186a4f58d33ea32408c2d6c314c55d6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingState: {fileID: 0}
 --- !u!1 &688632965
 GameObject:
   m_ObjectHideFlags: 0
