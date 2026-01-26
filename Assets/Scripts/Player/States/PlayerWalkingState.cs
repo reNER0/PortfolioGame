@@ -184,7 +184,7 @@ public class PlayerWalkingState : PlayerState
         var targetVelocity = moveDirection * _player.MaxSpeed;
 
         if (standingRigidbody != null)
-            targetVelocity += standingRigidbody.velocity;
+            targetVelocity += standingRigidbody.GetPointVelocity(hit.point);
 
         var velocity = _player.Rigidbody.velocity;
 
@@ -200,7 +200,10 @@ public class PlayerWalkingState : PlayerState
         var accelerationToApply = (currentVelocity - velocity) / Time.fixedDeltaTime;
 
         _player.Rigidbody.AddForce(accelerationToApply * _player.Rigidbody.mass);
-        standingRigidbody?.AddForceAtPosition(-accelerationToApply * _player.Rigidbody.mass, hit.point);
+
+        // TODO : add this if want player to move standing rigidbody
+        // disabled this bacause was very laggy
+        //standingRigidbody?.AddForceAtPosition(-accelerationToApply * _player.Rigidbody.mass, hit.point);
     }
 
     private void Rotate(float x, float y)

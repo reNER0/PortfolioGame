@@ -729,6 +729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0
@@ -744,7 +745,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1022774981}
   serializedVersion: 4
-  m_Mass: 20
+  m_Mass: 50
   m_Drag: 0.3
   m_AngularDrag: 0.3
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -893,6 +894,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0
@@ -930,7 +932,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1926947063}
   serializedVersion: 4
-  m_Mass: 100
+  m_Mass: 70
   m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1163,6 +1165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0
@@ -1178,7 +1181,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1288977108}
   serializedVersion: 4
-  m_Mass: 20
+  m_Mass: 50
   m_Drag: 0.3
   m_AngularDrag: 0.3
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1727,6 +1730,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0
@@ -1764,7 +1768,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1926947061}
   serializedVersion: 4
-  m_Mass: 20
+  m_Mass: 70
   m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1795,6 +1799,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0
@@ -1832,7 +1837,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1926947065}
   serializedVersion: 4
-  m_Mass: 10
+  m_Mass: 70
   m_Drag: 0.05
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -2043,7 +2048,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5109859907726875646}
   serializedVersion: 4
-  m_Mass: 20
+  m_Mass: 50
   m_Drag: 0.3
   m_AngularDrag: 0.3
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -2190,6 +2195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputSeam: 0
   lastAppliedInputs:
     X: 0
     Y: 0
