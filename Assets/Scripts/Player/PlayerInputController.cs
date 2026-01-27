@@ -10,9 +10,13 @@ public class PlayerInputController : MonoBehaviour
     private bool jump;
     private static int previewTick;
 
+    private TickRecorder TickRecorder;
+
 
     private void Awake()
     {
+        TickRecorder = gameObject.AddComponent<TickRecorder>();
+
         inputSystem = new();
         inputSystem.Enable();
         inputSystem.Inputs.Jump.performed += OnJump;
@@ -21,6 +25,13 @@ public class PlayerInputController : MonoBehaviour
     private void OnDestroy()
     {
         inputSystem.Inputs.Jump.performed -= OnJump;
+    }
+
+
+    // Only on setup client
+    public static void SetPreviewTick(int tick)
+    {
+        previewTick = tick;
     }
 
 
@@ -60,6 +71,7 @@ public class PlayerInputController : MonoBehaviour
             if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
             {
                 Physics.Simulate(Time.fixedDeltaTime);
+                TickRecorder.RecordTick(previewTick);
             }
 
             player.SaveCurrentState(previewTick);
