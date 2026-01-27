@@ -726,17 +726,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1022774981}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
+  m_Script: {fileID: 11500000, guid: f7d6b30cba93e44038f268226e82763e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputSeam: 0
-  lastAppliedInputs:
-    X: 0
-    Y: 0
-    Jump: 0
-    Tick: 0
-  Rigidbody: {fileID: 1022774983}
-  serverStateTransform: {fileID: 819696175}
 --- !u!54 &1022774983
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1162,17 +1154,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1288977108}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
+  m_Script: {fileID: 11500000, guid: f7d6b30cba93e44038f268226e82763e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputSeam: 0
-  lastAppliedInputs:
-    X: 0
-    Y: 0
-    Jump: 0
-    Tick: 0
-  Rigidbody: {fileID: 1288977110}
-  serverStateTransform: {fileID: 1403877840}
 --- !u!54 &1288977110
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2192,17 +2176,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5109859907726875646}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81c3d328c07954ac6848c586e2324e70, type: 3}
+  m_Script: {fileID: 11500000, guid: f7d6b30cba93e44038f268226e82763e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputSeam: 0
-  lastAppliedInputs:
-    X: 0
-    Y: 0
-    Jump: 0
-    Tick: 0
-  Rigidbody: {fileID: 2304882919457134714}
-  serverStateTransform: {fileID: 435641103258033219}
 --- !u!23 &7853119475220773905
 MeshRenderer:
   m_ObjectHideFlags: 0
