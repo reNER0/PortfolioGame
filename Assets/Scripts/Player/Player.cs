@@ -1,10 +1,17 @@
+using Assets.Scripts.Commands;
+using Assets.Scripts.Network;
+using System;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
-public class Player : PhysicsObject
+public class Player : PhysicsObject, IDamagable, IHealth
 {
     public PlayerStateMachine PlayerStateMachine { get; private set; }
     public Animator Animator { get; private set; }
+
+    private int health = 100;
+    private int maxHealth = 100;
 
 
     [SerializeField]
@@ -33,6 +40,8 @@ public class Player : PhysicsObject
     private float springForce;
     [SerializeField]
     private float springDamping;
+
+    public event Action<int> HealthChanged;
 
     public float MaxSpeed => maxSpeed;
     public float MaxAcceleration => maxAcceleration;
@@ -67,6 +76,19 @@ public class Player : PhysicsObject
     }
 
 
+    public override PredictableState GetState()
+    {
+        return new PlayerSyncState(InputProcessor.ProcessTick,
+            Rigidbody.position,
+            Rigidbody.velocity,
+            Rigidbody.rotation,
+            Rigidbody.angularVelocity,
+            lastAppliedInputs,
+            health
+            );
+    }
+
+
     private void OnCollisionEnter(Collision collision)
     {
         PlayerStateMachine.OnCollisionEnter(collision);
@@ -78,13 +100,16 @@ public class Player : PhysicsObject
         if (PlayerStateMachine.currentState.GetType() == typeof(PlayerDrivingState))
             return;
 
-        var serverState = state as RigidbodyState;
+        var serverState = state as PlayerSyncState;
 
         if (serverState == null)
         {
             Debug.LogError("Error while applying server predictable state!");
             return;
         }
+
+
+        health = serverState._health;
 
 
         if (!NetworkRepository.IsCurrentClientOwnerOfObject(this))
@@ -120,5 +145,30 @@ public class Player : PhysicsObject
         }
 
         SmoothSync(localState as RigidbodyState, serverState);
+    }
+
+    public void Damage(int damage)
+    {
+        health -= damage;
+
+        health = Math.Max(0, health);
+
+        HealthChanged?.Invoke(health);
+
+        if (health > 0)
+            return;
+
+        var killCmd = new KillPlayerCmd(NetworkRepository.NetworkObjectById.First(x => x.Predictable == this).Id);
+        NetworkBus.OnPerformCommand?.Invoke(killCmd);
+    }
+
+    public int GetHealth()
+    {
+        return health;
+    }
+
+    public int GetMaxHealth()
+    {
+        return maxHealth;
     }
 }
