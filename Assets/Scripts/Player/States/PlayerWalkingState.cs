@@ -4,18 +4,15 @@ using Assets.Scripts.Network.Commands;
 using UnityEditor.Rendering;
 using UnityEngine;
 
-public class PlayerWalkingState : PlayerState
+public class PlayerWalkingState : PlayerStandingState
 {
     private DateTime creationTime = DateTime.Now;
     private float sleepTime = 1 / 2f;
 
-    private float lastDistance;
-    private bool isGrounded = false;
     private bool firstGroundTouch = false;
     private Vector3 currentVelocity;
 
-
-    private bool isJumped = true;
+    private bool isAiming;
 
     private Rigidbody standingRigidbody;
     private RaycastHit hit;
@@ -26,7 +23,7 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnEnter()
     {
-        lastDistance = _player.SpringDistance;
+        base.OnEnter();
     }
 
     public override void OnUpdate()
@@ -50,6 +47,35 @@ public class PlayerWalkingState : PlayerState
 
         SetLegIK(AvatarIKGoal.LeftFoot);
         SetLegIK(AvatarIKGoal.RightFoot);
+        //SetHandIK(AvatarIKGoal.LeftHand);
+        //SetHandIK(AvatarIKGoal.RightHand);
+
+        //_player.Animator.SetLayerWeight(1, _player.WeaponController.IsUsingRightHand() ? 1 : 0);
+    }
+
+    private void SetHandIK(AvatarIKGoal avatarIKGoal)
+    {
+        float ikWeight = 0;
+
+        switch (avatarIKGoal) 
+        {
+            case AvatarIKGoal.LeftHand:
+                ikWeight = _player.WeaponController.IsUsingLeftHand() ? 1 : 0;
+
+                _player.Animator.SetIKPosition(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.leftHandGrip.transform.position);
+                _player.Animator.SetIKRotation(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.leftHandGrip.transform.rotation);
+                break;
+
+            case AvatarIKGoal.RightHand:
+                ikWeight = _player.WeaponController.IsUsingRightHand() ? 1 : 0;
+
+                _player.Animator.SetIKPosition(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.rightHandGrip.transform.position);
+                _player.Animator.SetIKRotation(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.rightHandGrip.transform.rotation);
+                break;
+        }
+
+        _player.Animator.SetIKPositionWeight(avatarIKGoal, ikWeight);
+        _player.Animator.SetIKRotationWeight(avatarIKGoal, ikWeight);
     }
 
     private void SetLegIK(AvatarIKGoal avatarIKGoal)
@@ -83,7 +109,7 @@ public class PlayerWalkingState : PlayerState
 
     public override void OnCollisionEnter(Collision collision)
     {
-        if (!NetworkRepository.IsCurrentClientOwnerOfObject(_player))
+        if (!NetworkRepository.Current.IsCurrentClientOwnerOfObject(_player))
             return;
 
         var car = collision.gameObject.GetComponent<Car>();
@@ -96,17 +122,16 @@ public class PlayerWalkingState : PlayerState
         if (seat == null)
             return;
 
-        var carId = NetworkRepository.NetworkObjectById.First(x => x.Predictable == car).Id;
+        var carId = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == car).Id;
         var seatId = car.GetSeatId(seat);
 
-        var jumpInCarCmd = new JumpInCarCmd(NetworkRepository.CurrentObjectId, carId, seatId);
+        var jumpInCarCmd = new JumpInCarCmd(NetworkRepository.Current.CurrentObjectId, carId, seatId);
 
         NetworkBus.OnPerformCommand?.Invoke(jumpInCarCmd);
     }
 
     public override void OnInput(PlayerInputs playerInputs)
     {
-
         ApplyMoveForce(playerInputs.X, playerInputs.Y);
 
         Rotate(playerInputs.X, playerInputs.Y);
@@ -114,65 +139,12 @@ public class PlayerWalkingState : PlayerState
         if (isGrounded && playerInputs.Jump)
             Jump();
 
-        if (!isGrounded)
-            ApplyAdditiveGravity();
-
-        if (!IsSleepTimeElapsed())
-            return;
-
-        if (_player.Rigidbody.velocity.y <= 0)
-            isJumped = false;
-
-        if (!isJumped)
-            ApplySpringForce();
+        base.OnInput(playerInputs);
     }
 
     public override void OnExit()
     {
 
-    }
-
-
-    private bool IsSleepTimeElapsed()
-    {
-        return (DateTime.Now - creationTime).TotalSeconds > sleepTime;
-    }
-
-
-    private void ApplySpringForce()
-    {
-        if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance))
-        {
-            isGrounded = true;
-
-            standingRigidbody = hit.rigidbody;
-        }
-        else
-        {
-            lastDistance = _player.SpringDistance;
-            isGrounded = false;
-
-            standingRigidbody = null;
-        }
-
-
-        if (isGrounded)
-        {
-            var springOffset = _player.SpringDistance - hit.distance;
-            var springForceToApply = springOffset * _player.SpringForce;
-
-            var springDeltaPerTick = lastDistance - hit.distance;
-            var springDelta = springDeltaPerTick / Time.fixedDeltaTime;
-
-            var springDampToApply = springDelta * _player.SpringDamping;
-
-            var forceToApply = springForceToApply + springDampToApply;
-
-            _player.Rigidbody.AddForce(Vector3.up * forceToApply);
-            standingRigidbody?.AddForceAtPosition(Vector3.down * forceToApply, hit.point);
-
-            lastDistance = hit.distance;
-        }
     }
 
     private void ApplyMoveForce(float x, float y)
@@ -208,10 +180,15 @@ public class PlayerWalkingState : PlayerState
 
     private void Rotate(float x, float y)
     {
-        if (x == 0 && y == 0)
+        bool isAiming = _player.WeaponController.IsAiming();
+
+        if (x == 0 && y == 0 && !isAiming)
             return;
 
         Vector3 targetDir = _player.Rigidbody.velocity;
+
+        if (isAiming)
+            targetDir = PlayerCamera.Instance.transform.forward;
 
         if (standingRigidbody != null)
             targetDir -= standingRigidbody.velocity;
@@ -229,11 +206,6 @@ public class PlayerWalkingState : PlayerState
         lastDistance = _player.SpringDistance;
 
         _player.Rigidbody.AddForce(Vector3.up * _player.JumpForce * _player.Rigidbody.mass, ForceMode.Impulse);
-    }
-
-    private void ApplyAdditiveGravity()
-    {
-        _player.Rigidbody.AddForce(Vector3.down * _player.AdditiveGravity, ForceMode.Acceleration);
     }
 
 

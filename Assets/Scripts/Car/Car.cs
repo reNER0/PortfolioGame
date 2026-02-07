@@ -74,7 +74,7 @@ public class Car : PhysicsObject
 
         var driver = seats.FirstOrDefault().Player;
 
-        if (driver == null || !NetworkRepository.IsCurrentClientOwnerOfObject(driver))
+        if (driver == null || !NetworkRepository.Current.IsCurrentClientOwnerOfObject(driver))
         {
             Rigidbody.MovePosition(serverState.Position);
             Rigidbody.MoveRotation(serverState.Rotation);

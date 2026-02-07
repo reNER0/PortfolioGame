@@ -5,10 +5,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputController : MonoBehaviour
 {
-    public NewInputSystem inputSystem { get; private set; }
-
+    public static NewInputSystem inputSystem { get; private set; }
+    public static int previewTick { get; private set; }
+    
     private bool jump;
-    private static int previewTick;
 
     private TickRecorder TickRecorder;
 
@@ -37,7 +37,7 @@ public class PlayerInputController : MonoBehaviour
 
     private void Update()
     {
-        var playerObject = NetworkRepository.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.CurrentObjectId);
+        var playerObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.Current.CurrentObjectId);
 
         if (playerObject == null)
             return;
@@ -50,18 +50,30 @@ public class PlayerInputController : MonoBehaviour
         Vector2 moveInput = inputSystem.Inputs.Move.ReadValue<Vector2>();
         var moveDirection = player.PlayerStateMachine.GetInputDirectionOverride(moveInput);
 
+        var lookPoint = PlayerCamera.Instance.GetLookPoint();
+
+        var aimDirection = player.transform.forward;
+
+        if (player.WeaponController.Weapon != null)
+            aimDirection = lookPoint - player.WeaponController.Weapon.weaponObject.muzzle.position;
+
+        Tools.YawPitchFromDirection(aimDirection, out var yaw, out var pitch);
+
+        bool fireInput = inputSystem.Inputs.Fire.IsPressed();
+        bool aimInput = inputSystem.Inputs.Aim.IsPressed();
+
         while (previewTick < NetworkTime.CurrentTick)
         {
             previewTick++;
 
-            var input = new PlayerInputs(moveDirection.x, moveDirection.y, jump, previewTick);
+            var input = new PlayerInputs(moveDirection.x, moveDirection.y, yaw, pitch, jump, fireInput, aimInput, previewTick);
 
             jump = false;
 
             NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
 
             // Client prediction
-            if (NetworkRepository.IsServer)
+            if (NetworkRepository.Current.IsServer)
                 return;
 
             player.Input(input);

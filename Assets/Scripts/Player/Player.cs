@@ -3,10 +3,12 @@ using Assets.Scripts.Network;
 using System;
 using System.Linq;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : PhysicsObject, IDamagable, IHealth
 {
+    public WeaponController WeaponController { get; private set; }
     public PlayerStateMachine PlayerStateMachine { get; private set; }
     public Animator Animator { get; private set; }
 
@@ -64,6 +66,8 @@ public class Player : PhysicsObject, IDamagable, IHealth
 
         PlayerStateMachine = Animator.gameObject.AddComponent<PlayerStateMachine>();
         PlayerStateMachine.ChangeState(new PlayerWalkingState(this));
+
+        WeaponController = GetComponent<WeaponController>();
     }
 
 
@@ -73,6 +77,8 @@ public class Player : PhysicsObject, IDamagable, IHealth
         base.Input(playerInputs);
 
         PlayerStateMachine.OnInput(playerInputs);
+
+        WeaponController.Input(playerInputs);
     }
 
 
@@ -108,11 +114,13 @@ public class Player : PhysicsObject, IDamagable, IHealth
             return;
         }
 
+        if (health != serverState._health)
+        {
+            health = serverState._health;
+            HealthChanged?.Invoke(health);
+        }
 
-        health = serverState._health;
-
-
-        if (!NetworkRepository.IsCurrentClientOwnerOfObject(this))
+        if (!NetworkRepository.Current.IsCurrentClientOwnerOfObject(this))
         {
             Rigidbody.MovePosition(serverState.Position);
             Rigidbody.MoveRotation(serverState.Rotation);
@@ -158,7 +166,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
         if (health > 0)
             return;
 
-        var killCmd = new KillPlayerCmd(NetworkRepository.NetworkObjectById.First(x => x.Predictable == this).Id);
+        var killCmd = new KillPlayerCmd(NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == this).Id);
         NetworkBus.OnPerformCommand?.Invoke(killCmd);
     }
 

@@ -16,11 +16,13 @@ public class KillPlayerCmd : SerializableClass, ICommand
 
     public void Execute()
     {
-        var player = (Player)NetworkRepository.NetworkObjectById.First(x => x.Id == _playerObjectId).Predictable;
+        var player = (Player)NetworkRepository.Current.NetworkObjectById.First(x => x.Id == _playerObjectId).Predictable;
 
-        if (NetworkRepository.IsServer)
+        if (NetworkRepository.Current.IsServer)
                 NetworkBus.OnCommandSendToClients(this);
 
         player.PlayerStateMachine.ChangeState(new PlayerDeadState(player));
+
+        GameBus.OnPlayerDead?.Invoke(player);
     }
 }

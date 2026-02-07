@@ -8,6 +8,8 @@ public class MainMenuPanel : MonoBehaviour
     [SerializeField]
     private Button clientButton;
     [SerializeField]
+    private Button matchmakingButton;
+    [SerializeField]
     private Button exitButton;
 
 
@@ -15,6 +17,7 @@ public class MainMenuPanel : MonoBehaviour
     {
         hostButton.onClick.AddListener(OnHostButton);
         clientButton.onClick.AddListener(OnClientButton);
+        matchmakingButton.onClick.AddListener(OnMatchmakingButton);
         exitButton.onClick.AddListener(OnExitButton);
     }
 
@@ -27,6 +30,12 @@ public class MainMenuPanel : MonoBehaviour
     private void OnClientButton()
     {
         SceneLoader.LoadClientScene();
+    }
+    
+    private void OnMatchmakingButton()
+    {
+        var matchmaking = gameObject.AddComponent<MatchmakingClient>();
+        matchmaking.StartMatchmaking();
     }
 
     private void OnExitButton()

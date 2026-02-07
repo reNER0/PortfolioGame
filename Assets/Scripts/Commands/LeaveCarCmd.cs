@@ -22,16 +22,16 @@ public class LeaveCarCmd : SerializableClass, ICommand
 
     public void Execute()
     {
-        var carPredictable = NetworkRepository.NetworkObjectById.FirstOrDefault(x => x.Id == _carId).Predictable;
+        var carPredictable = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == _carId).Predictable;
         var car = (Car)carPredictable;
 
         var seat = car.GetSeat(_seatId);
 
-        var player = (Player)NetworkRepository.NetworkObjectById.First(x => x.Id == _playerId).Predictable;
+        var player = (Player)NetworkRepository.Current.NetworkObjectById.First(x => x.Id == _playerId).Predictable;
 
-        bool isSender = senderId == NetworkRepository.CurrentCliendId;
+        bool isSender = senderId == NetworkRepository.Current.CurrentCliendId;
 
-        if (NetworkRepository.IsServer)
+        if (NetworkRepository.Current.IsServer)
         {
             if (isSender)
             {
@@ -39,13 +39,14 @@ public class LeaveCarCmd : SerializableClass, ICommand
             }
             else
             {
-                var sender = NetworkRepository.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
+                var sender = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientId == senderId);
                 NetworkBus.OnCommandSendToClientsExcept(this, sender);
             }
         }
         else if (isSender)
         {
             NetworkBus.OnCommandSendToServer?.Invoke(this);
+            PlayerCamera.Instance.SetState(false);
         }
 
         seat.SetPlayer(null);

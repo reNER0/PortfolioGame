@@ -74,13 +74,13 @@ public class PlayerDrivingState : PlayerState
     {
         _car.Input(playerInputs);
 
-        if (!NetworkRepository.IsCurrentClientOwnerOfObject(_player))
+        if (!NetworkRepository.Current.IsCurrentClientOwnerOfObject(_player))
             return;
 
         if (!playerInputs.Jump)
             return;
 
-        var leaveCar = new LeaveCarCmd(NetworkRepository.CurrentObjectId, NetworkRepository.NetworkObjectById.First(x => x.Predictable == _car).Id, _car.GetSeatId(_seat));
+        var leaveCar = new LeaveCarCmd(NetworkRepository.Current.CurrentObjectId, NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == _car).Id, _car.GetSeatId(_seat));
 
         NetworkBus.OnPerformCommand?.Invoke(leaveCar);
     }

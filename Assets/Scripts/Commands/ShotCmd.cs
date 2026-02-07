@@ -25,7 +25,7 @@ public class ShotCmd : SerializableClass, ICommand
         // If Server - do shot and send hit cmd to all clients
         // If Client - send to server
 
-        if (NetworkRepository.IsServer) 
+        if (NetworkRepository.Current.IsServer) 
         {
             var hitCollider = ShotProcessor.GetHit(_origin, _direction);
 

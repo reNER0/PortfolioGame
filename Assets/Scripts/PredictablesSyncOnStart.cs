@@ -12,7 +12,7 @@ public class PredictablesSyncOnStart : MonoBehaviour
         foreach (var predictable in predictables)
         {
             var networkObject = new NetworkObject(predictable);
-            NetworkRepository.NetworkObjectById.Add(networkObject);
+            NetworkRepository.Current.NetworkObjectById.Add(networkObject);
         }
     }
 }

@@ -23,6 +23,7 @@ public class MainState : State
 
         NetworkBus.OnClientConnected += SpawnPlayer;
         NetworkBus.OnClientDisconnected += DestroyPlayer;
+        GameBus.OnPlayerDead += OnPlayerDead;
 
         if (!spawnServerPlayer)
             return;
@@ -39,6 +40,7 @@ public class MainState : State
     {
         NetworkBus.OnClientConnected -= SpawnPlayer;
         NetworkBus.OnClientDisconnected -= DestroyPlayer;
+        GameBus.OnPlayerDead -= OnPlayerDead;
     }
 
 
@@ -48,12 +50,14 @@ public class MainState : State
 
         NetworkBus.OnPerformCommand?.Invoke(destroyPlayerCmd);
         NetworkBus.OnCommandSendToClients?.Invoke(destroyPlayerCmd);
+
+        CheckForGameOver();
     }
 
 
     private void SpawnPlayer(NetworkClient client)
     {
-        var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(NetworkRepository.CurrentCliendId);
+        var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(NetworkRepository.Current.CurrentCliendId);
 
         if (spawnTransform == null)
         {
@@ -70,11 +74,39 @@ public class MainState : State
         if (client != null)
             clientId = client.ClientId;
 
-        var setPlayerObjectCmd = new SetPlayerObjectCmd(clientId, NetworkRepository.NetworkObjectById.Last().Id);
+        var setPlayerObjectCmd = new SetPlayerObjectCmd(clientId, NetworkRepository.Current.NetworkObjectById.Last().Id);
 
         NetworkBus.OnPerformCommand?.Invoke(setPlayerObjectCmd);
 
         if (client != null)
             NetworkBus.OnCommandSendToClient?.Invoke(setPlayerObjectCmd, client);
+    }
+
+
+    private void OnPlayerDead(Player player)
+    {
+        CheckForGameOver();
+    }
+
+    private void CheckForGameOver() 
+    {
+        var countOfAlivePlayers = NetworkRepository.Current.NetworkObjectById.Where(x => x.Predictable.GetType() == typeof(Player))
+                                                            .Select(x => (Player)x.Predictable)
+                                                            .Count(x => x.GetHealth() > 0);
+
+        if (countOfAlivePlayers > 1)
+            return;
+
+        GameOver();
+    }
+
+    private void GameOver() 
+    {
+        Debug.Log("Game Over!");
+
+        ServerHub.DisconnectAllClients();
+
+        Debug.Log("[DEDIC] Match finished, shutting down");
+        Application.Quit(0);
     }
 }
