@@ -152,7 +152,7 @@ public class WeaponController : MonoBehaviour
             return;
         }
 
-        if (!isAiming && !isPreparing && !isReloading)
+        if (!isAiming && !isPreparing && !isReloading && !Weapon.weaponModel.isTwoHanded)
         {
             SetLeftHandIK(0);
             SetUpperBodyWeight(0);
@@ -161,6 +161,12 @@ public class WeaponController : MonoBehaviour
 
         SetUpperBodyWeight(1);
 
+
+        if (Weapon.weaponModel.isTwoHanded)
+        {
+            SetLeftHandIK(1);
+            return;
+        }
 
         if (isAiming) 
         {

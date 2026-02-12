@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef3aa8fb299fef0419fb78fcad0b4122, type: 3}
-  m_Name: Pistol
+  m_Name: AK47
   m_EditorClassIdentifier: 
-  prefab: {fileID: 1865657643461369354, guid: c051b47ea3510534698d47950a6062f0, type: 3}
+  prefab: {fileID: 1856672153254684174, guid: 54cea045fc05afe46875b4152640d6c2, type: 3}
   damage: 10
   range: 100
-  isTwoHanded: 1
+  isTwoHanded: 0
   bulletsPerShot: 1
   spread: 10
   fireRate: 0.5
-  ammoCapacity: 12
+  ammoCapacity: 30
   reloadTime: 5
-  fireMode: 1
+  fireMode: 0
   reloadMode: 0
