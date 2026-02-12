@@ -50,6 +50,6 @@ public class LeaveCarCmd : SerializableClass, ICommand
         }
 
         seat.SetPlayer(null);
-        player.PlayerStateMachine.ChangeState(new PlayerWalkingState(player));
+        player.PlayerStateMachine.ChangeState(new PlayerWalkingState(player, 1/2f));
     }
 }

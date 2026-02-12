@@ -4,14 +4,12 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class WeaponController : MonoBehaviour
 {
-    public TrailRenderer TrailRendererPrefab;
-
     public AudioClip AudioClip;
     public AudioSource AudioSource { get; private set; }
-    public WeaponStateMachine WeaponStateMachine { get; private set; }
     public PlayerAnimationEvents PlayerAnimationEvents { get; private set; }
     public Animator Animator { get; private set; }
 
@@ -19,40 +17,20 @@ public class WeaponController : MonoBehaviour
 
     public Weapon Weapon;
 
-    public WeaponModel WeaponModel;
-
-    private int damage = 10;
-
-    private float maxDistance = 100f;
-
-    private float _accumulatedTime = 0;
-
-    private float _shotInterval = 0.1f;
-
-    public float AimTime = 1;
-
-    private bool _lastFire;
-
-    private Tween _shootTween;
-
     private bool isReloading;
 
     private bool isPreparing;
 
-    private bool isShowingWeapon = true;
+    private bool isAiming;
 
-    private float lastAimTime;
+    private Tween _layerTween;
+
 
     private void Awake()
     {
         Animator = GetComponentInChildren<Animator>();
 
         PlayerAnimationEvents = Animator.AddComponent<PlayerAnimationEvents>();
-
-        Weapon = new Weapon(WeaponModel, WeaponSocket);
-
-        //WeaponStateMachine = Animator.gameObject.AddComponent<WeaponStateMachine>();
-        //WeaponStateMachine.ChangeState(new WeaponReadyState(this));
 
         AudioSource = gameObject.AddComponent<AudioSource>();
     }
@@ -73,140 +51,41 @@ public class WeaponController : MonoBehaviour
         PlayerAnimationEvents.OnPrepareAnimationFinished -= OnPrepareAnimationFinished;
     }
 
+    public void PickupWeapon(WeaponModel weaponModel)
+    {
+        if (Weapon != null)
+            Destroy(Weapon.weaponObject.gameObject);
+
+        var player = GetComponent<Player>();
+        Weapon = WeaponFactory.CreateWeapon(player, weaponModel, WeaponSocket);
+    }
+
     private void OnReload(InputAction.CallbackContext context)
     {
-        isReloading = true;
-        OnReloadAnimationStarted();
-        //WeaponStateMachine.ChangeState(new WeaponReloadingState(this));
+        OnReload();
     }
 
     // same as FixedUpdate
     public void Input(PlayerInputs playerInputs)
     {
-        var direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
-
-        bool fireHeld = playerInputs.Fire;
-        bool fireDown = fireHeld && !_lastFire;
-        bool fireUp = !fireHeld && _lastFire;
-
-        if (!fireDown)
+        if (Weapon == null)
             return;
 
-        var player = GetComponent<Player>();
+        Aim(playerInputs.Aim);
 
-        if (player.PlayerStateMachine.currentState.GetType() == typeof(PlayerAttackState))
+        if (isReloading)
             return;
 
-        player.PlayerStateMachine.ChangeState(new PlayerAttackState(player));
+        if (isPreparing)
+            return;
 
-
-        return;
-        // --- VISUAL (local prediction) ---
-        if (fireDown) OnStartShooting();
-        if (fireUp) OnStopShooting();
-
-        // --- SIMULATION (server authoritative) ---
-        if (fireDown)
+        if (Weapon.weaponLogic.NeedReload())
         {
-            _accumulatedTime = 0f;
-            Shot(playerInputs); // первый выстрел сразу
-        }
-        else if (fireHeld)
-        {
-            _accumulatedTime += Time.fixedDeltaTime;
-
-            while (_accumulatedTime >= _shotInterval)
-            {
-                _accumulatedTime -= _shotInterval;
-                Shot(playerInputs);
-            }
+            // TODO : make automatic reload
+            return;
         }
 
-        _lastFire = fireHeld;
-    }
-
-    private void OnStartShooting()
-    {
-        ShowVisualTrail();
-
-        _shootTween = DOVirtual.DelayedCall(
-            _shotInterval,
-            ShowVisualTrail
-        )
-        .SetLoops(-1, LoopType.Restart)
-        .SetUpdate(UpdateType.Normal);
-    }
-
-    private void OnStopShooting()
-    {
-        if (_shootTween != null)
-        {
-            _shootTween.Kill();
-            _shootTween = null;
-        }
-    }
-
-    private void ShowVisualTrail()
-    {
-        var camera = Camera.main;
-
-        if (!Physics.Raycast(camera.transform.position, camera.transform.forward, out var hit, 50))
-            return;
-
-        var trail = Instantiate(TrailRendererPrefab, Weapon.weaponObject.muzzle.position, Weapon.weaponObject.muzzle.rotation);
-
-        trail.transform.DOMove(hit.point, 0.05f).OnComplete(() => { Destroy(trail.gameObject, trail.time); });
-    }
-
-    private void Shot(PlayerInputs playerInputs)
-    {
-        lastAimTime = Time.time;
-
-        Weapon.ammoCount--;
-
-        if (!NetworkRepository.Current.IsServer)
-            return;
-
-        var direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
-
-        var hitCollider = GetHit(Weapon.weaponObject.muzzle.position, direction);
-
-        if (hitCollider == null)
-            return;
-
-        var damagable = hitCollider.GetComponent<IDamagable>();
-
-        if (damagable == null)
-            return;
-
-        damagable.Damage(damage);
-
-        var predictable = hitCollider.GetComponent<Predictable>();
-
-        if (predictable == null)
-            return;
-
-        var networkObject = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == predictable);
-        var hitCmd = new HitCmd(networkObject.Id, damage);
-
-        var shooterNetworkObject = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == GetComponent<Predictable>());
-        var shooterClient = NetworkRepository.Current.ConnectedClients.First(x => x.ClientObjectId == shooterNetworkObject.Id);
-
-        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, shooterClient);
-
-        var hitClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == networkObject.Id);
-        if (hitClient == null)
-            return;
-
-        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, hitClient);
-
-
-        Collider GetHit(Vector3 origin, Vector3 direction)
-        {
-            Physics.Raycast(origin, direction, out var hit, maxDistance);
-
-            return hit.collider;
-        }
+        Weapon.weaponLogic.Attack(playerInputs);
     }
 
 
@@ -220,14 +99,28 @@ public class WeaponController : MonoBehaviour
         OnReloadFinished();
     }
 
+    private void Aim(bool aim)
+    {
+        isAiming = aim;
+        Animator.SetBool("IsAiming", aim);
+    }
+
+    private void OnReload()
+    {
+        isReloading = true;
+        OnReloadAnimationStarted();
+    }
+
     private void OnReloadFinished()
     {
-        Weapon.OnReload();
+        isReloading = false;
+        Weapon.weaponLogic.OnReload();
         OnPrepare();
     }
 
     private void OnPrepare()
     {
+        isPreparing = true;
         OnPrepareAnimationStarted();
     }
 
@@ -247,18 +140,67 @@ public class WeaponController : MonoBehaviour
     }
 
 
-    public bool IsUsingLeftHand() 
+    private void OnAnimatorIK(int layerIndex)
     {
-        return !isReloading && !isPreparing && isShowingWeapon;
+        if (layerIndex != 1)
+            return;
+
+        if (Weapon == null)
+        {
+            SetLeftHandIK(0);
+            SetUpperBodyWeight(0);
+            return;
+        }
+
+        if (!isAiming && !isPreparing && !isReloading)
+        {
+            SetLeftHandIK(0);
+            SetUpperBodyWeight(0);
+            return;
+        }
+
+        SetUpperBodyWeight(1);
+
+
+        if (isAiming) 
+        {
+            SetLeftHandIK(1);
+            return;
+        }
+
+        SetLeftHandIK(0);
     }
 
-    public bool IsUsingRightHand()
+    private void SetLeftHandIK(float ikWeight)
     {
-        return isShowingWeapon;
+        var avatarIKGoal = AvatarIKGoal.LeftHand;
+
+        Animator.SetIKPositionWeight(avatarIKGoal, ikWeight);
+        Animator.SetIKRotationWeight(avatarIKGoal, ikWeight);
+
+        if (Weapon == null)
+            return;
+
+        Animator.SetIKPosition(avatarIKGoal, Weapon.weaponObject.leftHandGrip.transform.position);
+        Animator.SetIKRotation(avatarIKGoal, Weapon.weaponObject.leftHandGrip.transform.rotation);
     }
 
-    public bool IsAiming()
+    private void SetUpperBodyWeight(float targetWeight, float duration = 0.25f)
     {
-        return lastAimTime + AimTime > Time.time;
+        _layerTween?.Kill();
+
+        float current = Animator.GetLayerWeight(1);
+
+        _layerTween = DOTween.To(
+            () => current,
+            x =>
+            {
+                current = x;
+                Animator.SetLayerWeight(1, current);
+            },
+            targetWeight,
+            duration
+        )
+        .SetEase(Ease.OutSine);
     }
 }

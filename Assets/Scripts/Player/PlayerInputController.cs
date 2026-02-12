@@ -54,7 +54,7 @@ public class PlayerInputController : MonoBehaviour
 
         var aimDirection = player.transform.forward;
 
-        if (player.WeaponController.Weapon != null)
+        if (player.WeaponController.Weapon != null && player.WeaponController.Weapon.weaponObject.muzzle != null)
             aimDirection = lookPoint - player.WeaponController.Weapon.weaponObject.muzzle.position;
 
         Tools.YawPitchFromDirection(aimDirection, out var yaw, out var pitch);

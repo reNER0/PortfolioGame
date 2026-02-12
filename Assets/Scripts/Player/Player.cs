@@ -65,7 +65,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
         Animator = GetComponentInChildren<Animator>();
 
         PlayerStateMachine = Animator.gameObject.AddComponent<PlayerStateMachine>();
-        PlayerStateMachine.ChangeState(new PlayerWalkingState(this));
+        PlayerStateMachine.ChangeState(new PlayerWalkingState(this, 0));
 
         WeaponController = GetComponent<WeaponController>();
     }
@@ -81,7 +81,13 @@ public class Player : PhysicsObject, IDamagable, IHealth
         WeaponController.Input(playerInputs);
     }
 
-
+    
+    void OnAnimatorMove()
+    {
+        Rigidbody.MovePosition(Rigidbody.position + Animator.deltaPosition);
+        //transform.position = transform.position + Animator.deltaPosition;
+    }
+    
     public override PredictableState GetState()
     {
         return new PlayerSyncState(InputProcessor.ProcessTick,

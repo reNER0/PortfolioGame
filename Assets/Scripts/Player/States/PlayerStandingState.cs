@@ -7,22 +7,23 @@ using UnityEngine;
 public class PlayerStandingState : PlayerState
 {
     private DateTime creationTime = DateTime.Now;
-    private float sleepTime = 1 / 10f;
+    private float sleepTime;
 
     protected float lastDistance;
-    protected bool isGrounded = false;
-    private bool firstGroundTouch = false;
-    private Vector3 currentVelocity;
+    protected bool isGrounded = true;
+    protected bool firstGroundTouch = false;
+    protected Vector3 currentVelocity;
 
-    private bool isAiming;
+    protected bool isJumped = false;
 
-    protected bool isJumped = true;
-
-    private Rigidbody standingRigidbody;
-    private RaycastHit hit;
+    protected Rigidbody standingRigidbody;
+    protected RaycastHit hit;
 
 
-    public PlayerStandingState(Player player) : base(player) { }
+    public PlayerStandingState(Player player, float sleepTime = 0) : base(player)
+    {
+        this.sleepTime = sleepTime;
+    }
 
 
     public override void OnEnter()
@@ -57,6 +58,7 @@ public class PlayerStandingState : PlayerState
         //_player.Animator.SetLayerWeight(1, _player.WeaponController.IsUsingRightHand() ? 1 : 0);
     }
 
+    /*
     private void SetHandIK(AvatarIKGoal avatarIKGoal)
     {
         float ikWeight = 0;
@@ -81,7 +83,7 @@ public class PlayerStandingState : PlayerState
         _player.Animator.SetIKPositionWeight(avatarIKGoal, ikWeight);
         _player.Animator.SetIKRotationWeight(avatarIKGoal, ikWeight);
     }
-
+    */
     private void SetLegIK(AvatarIKGoal avatarIKGoal)
     {
         float ikWeight = 0;
@@ -113,8 +115,10 @@ public class PlayerStandingState : PlayerState
 
     public override void OnInput(PlayerInputs playerInputs)
     {
-        //if (!isGrounded)
-        //    ApplyAdditiveGravity();
+        ApplyMoveForce(playerInputs.X, playerInputs.Y);
+
+        if (!isGrounded)
+            ApplyAdditiveGravity();
 
         if (!IsSleepTimeElapsed())
             return;
@@ -137,10 +141,35 @@ public class PlayerStandingState : PlayerState
         return (DateTime.Now - creationTime).TotalSeconds > sleepTime;
     }
 
+    protected virtual void ApplyMoveForce(float x, float y)
+    {
+        ApplyTargetVelocity(Vector3.zero);
+    }
+
+    protected void ApplyTargetVelocity(Vector3 targetVelocity)
+    {
+        if (standingRigidbody != null)
+            targetVelocity += standingRigidbody.GetPointVelocity(hit.point);
+
+        var velocity = _player.Rigidbody.velocity;
+
+        velocity.y = 0;
+        targetVelocity.y = 0;
+
+        var dotVector = Vector3.Dot(targetVelocity.normalized, velocity.normalized);
+
+        var acceleration = (isGrounded ? _player.MaxAcceleration : _player.AirAcceleration) * _player.ReverseAccelerationMultiplierCurve.Evaluate(dotVector);
+
+        currentVelocity = Vector3.MoveTowards(velocity, targetVelocity, acceleration * Time.fixedDeltaTime);
+
+        var accelerationToApply = (currentVelocity - velocity) / Time.fixedDeltaTime;
+
+        _player.Rigidbody.AddForce(accelerationToApply * _player.Rigidbody.mass);
+    }
 
     private void ApplySpringForce()
     {
-        if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance))
+        if (Physics.Raycast(_player.transform.position + _player.transform.up, -_player.transform.up, out hit, _player.SpringDistance, _player.WalkableLayerMask, QueryTriggerInteraction.Ignore))
         {
             isGrounded = true;
 
@@ -153,7 +182,7 @@ public class PlayerStandingState : PlayerState
 
             standingRigidbody = null;
         }
-        return;
+
         if (isGrounded)
         {
             var springOffset = _player.SpringDistance - hit.distance;

@@ -5,6 +5,7 @@ public class PlayerAnimationEvents : MonoBehaviour
 {
     public Action OnReloadAnimationFinished;
     public Action OnPrepareAnimationFinished;
+    public Action OnAnimationCombo;
 
     public void ReloadAnimationFinished()
     {
@@ -14,5 +15,10 @@ public class PlayerAnimationEvents : MonoBehaviour
     public void PrepareAnimationFinished()
     {
         OnPrepareAnimationFinished?.Invoke();
+    }
+
+    public void Combo()
+    {
+        OnAnimationCombo?.Invoke();
     }
 }

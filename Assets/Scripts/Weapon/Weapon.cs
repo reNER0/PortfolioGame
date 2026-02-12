@@ -1,32 +1,32 @@
-using UnityEngine;
+using Assets.Scripts.Weapon;
 
-public class Weapon
+public abstract class Weapon
 {
+    public IWeaponLogic weaponLogic;
     public WeaponModel weaponModel;
     public WeaponPrefab weaponObject;
-    public int ammoCount;
 
-    public Weapon(WeaponModel weaponModel, Transform socket)
+    public Weapon(WeaponModel weaponModel, WeaponPrefab weaponPrefab)
     {
         this.weaponModel = weaponModel;
-
-        weaponObject = GameObject.Instantiate(weaponModel.prefab, socket);
+        this.weaponObject = weaponPrefab;
     }
+}
 
+public class GunWeapon : Weapon
+{
+    public int currentAmmo;
 
-    public void OnReload() 
+    public GunWeapon(GunModel weaponModel, WeaponPrefab weaponPrefab, Player player) : base(weaponModel, weaponPrefab)
     {
-        if (weaponModel.reloadMode == ReloadMode.Magazine)
-        {
-            ammoCount = weaponModel.ammoCapacity;
-            return;
-        }
-
-        ammoCount++;
+        weaponLogic = new GunWeaponLogic(this, weaponModel, player);
     }
+}
 
-    public bool NeedReload()
+public class MeleeWeapon : Weapon
+{
+    public MeleeWeapon(MeleeModel weaponModel, WeaponPrefab weaponPrefab, Player player) : base(weaponModel, weaponPrefab) 
     {
-        return ammoCount < weaponModel.ammoCapacity;
+        weaponLogic = new MeleeWeaponLogic(player);
     }
 }

@@ -1,24 +1,10 @@
-using System;
 using System.Linq;
-using Assets.Scripts.Network.Commands;
-using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerWalkingState : PlayerStandingState
 {
-    private DateTime creationTime = DateTime.Now;
-    private float sleepTime = 1 / 2f;
-
-    private bool firstGroundTouch = false;
-    private Vector3 currentVelocity;
-
-    private bool isAiming;
-
-    private Rigidbody standingRigidbody;
-    private RaycastHit hit;
-
-
-    public PlayerWalkingState(Player player) : base(player) { }
+    public PlayerWalkingState(Player player, float sleepTime) : base(player, sleepTime) { }
 
 
     public override void OnEnter()
@@ -47,35 +33,6 @@ public class PlayerWalkingState : PlayerStandingState
 
         SetLegIK(AvatarIKGoal.LeftFoot);
         SetLegIK(AvatarIKGoal.RightFoot);
-        //SetHandIK(AvatarIKGoal.LeftHand);
-        //SetHandIK(AvatarIKGoal.RightHand);
-
-        //_player.Animator.SetLayerWeight(1, _player.WeaponController.IsUsingRightHand() ? 1 : 0);
-    }
-
-    private void SetHandIK(AvatarIKGoal avatarIKGoal)
-    {
-        float ikWeight = 0;
-
-        switch (avatarIKGoal) 
-        {
-            case AvatarIKGoal.LeftHand:
-                ikWeight = _player.WeaponController.IsUsingLeftHand() ? 1 : 0;
-
-                _player.Animator.SetIKPosition(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.leftHandGrip.transform.position);
-                _player.Animator.SetIKRotation(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.leftHandGrip.transform.rotation);
-                break;
-
-            case AvatarIKGoal.RightHand:
-                ikWeight = _player.WeaponController.IsUsingRightHand() ? 1 : 0;
-
-                _player.Animator.SetIKPosition(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.rightHandGrip.transform.position);
-                _player.Animator.SetIKRotation(avatarIKGoal, _player.WeaponController.Weapon.weaponObject.rightHandGrip.transform.rotation);
-                break;
-        }
-
-        _player.Animator.SetIKPositionWeight(avatarIKGoal, ikWeight);
-        _player.Animator.SetIKRotationWeight(avatarIKGoal, ikWeight);
     }
 
     private void SetLegIK(AvatarIKGoal avatarIKGoal)
@@ -132,8 +89,6 @@ public class PlayerWalkingState : PlayerStandingState
 
     public override void OnInput(PlayerInputs playerInputs)
     {
-        ApplyMoveForce(playerInputs.X, playerInputs.Y);
-
         Rotate(playerInputs.X, playerInputs.Y);
 
         if (isGrounded && playerInputs.Jump)
@@ -147,7 +102,7 @@ public class PlayerWalkingState : PlayerStandingState
 
     }
 
-    private void ApplyMoveForce(float x, float y)
+    protected override void ApplyMoveForce(float x, float y)
     {
         var moveDirection = Vector3.forward * y + Vector3.right * x;
 
@@ -155,40 +110,20 @@ public class PlayerWalkingState : PlayerStandingState
 
         var targetVelocity = moveDirection * _player.MaxSpeed;
 
-        if (standingRigidbody != null)
-            targetVelocity += standingRigidbody.GetPointVelocity(hit.point);
-
-        var velocity = _player.Rigidbody.velocity;
-
-        velocity.y = 0;
-        targetVelocity.y = 0;
-
-        var dotVector = Vector3.Dot(moveDirection, velocity.normalized);
-
-        var acceleration = (isGrounded ? _player.MaxAcceleration : _player.AirAcceleration) * _player.ReverseAccelerationMultiplierCurve.Evaluate(dotVector);
-
-        currentVelocity = Vector3.MoveTowards(velocity, targetVelocity, acceleration * Time.fixedDeltaTime);
-
-        var accelerationToApply = (currentVelocity - velocity) / Time.fixedDeltaTime;
-
-        _player.Rigidbody.AddForce(accelerationToApply * _player.Rigidbody.mass);
-
-        // TODO : add this if want player to move standing rigidbody
-        // disabled this bacause was very laggy
-        //standingRigidbody?.AddForceAtPosition(-accelerationToApply * _player.Rigidbody.mass, hit.point);
+        ApplyTargetVelocity(targetVelocity);
     }
 
     private void Rotate(float x, float y)
     {
-        bool isAiming = _player.WeaponController.IsAiming();
+        //bool isAiming = _player.WeaponController.IsAiming();
 
-        if (x == 0 && y == 0 && !isAiming)
+        if (x == 0 && y == 0)
             return;
 
         Vector3 targetDir = _player.Rigidbody.velocity;
 
-        if (isAiming)
-            targetDir = PlayerCamera.Instance.transform.forward;
+        //if (isAiming)
+        //    targetDir = PlayerCamera.Instance.transform.forward;
 
         if (standingRigidbody != null)
             targetDir -= standingRigidbody.velocity;
