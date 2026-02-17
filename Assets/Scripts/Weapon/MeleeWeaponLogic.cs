@@ -1,8 +1,5 @@
 using Assets.Scripts.Weapon;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class MeleeWeaponLogic : IWeaponLogic
 {
@@ -16,6 +13,7 @@ public class MeleeWeaponLogic : IWeaponLogic
     public void Attack(PlayerInputs playerInputs)
     {
         var direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
+        direction.y = 0;
 
         bool fireHeld = playerInputs.Fire;
 
@@ -25,6 +23,8 @@ public class MeleeWeaponLogic : IWeaponLogic
         if (player.PlayerStateMachine.currentState.GetType() == typeof(PlayerAttackState))
             return;
 
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        player.Rigidbody.MoveRotation(targetRotation);
         player.PlayerStateMachine.ChangeState(new PlayerAttackState(player));
     }
 

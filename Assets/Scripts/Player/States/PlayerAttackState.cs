@@ -1,6 +1,7 @@
 using Assets.Scripts.Commands;
-using System;
+using Assets.Scripts.Network.Commands;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerAttackState : PlayerStandingState
@@ -20,13 +21,34 @@ public class PlayerAttackState : PlayerStandingState
     {
         base.OnEnter();
 
-        _player.Animator.SetBool("Attack", true);
-        _player.Animator.applyRootMotion = true;
+        SetAttackAnimation(true);
 
         lastComboTime = Time.time;
 
         _player.WeaponController.Weapon.weaponObject.MeleeTrigger.OnMeleeHit += OnHit;
         _player.WeaponController.PlayerAnimationEvents.OnAnimationCombo += OnCombo;
+    }
+
+
+    private void SetAttackAnimation(bool state) 
+    {
+        string animationName = "Attack";
+
+        _player.Animator.SetBool(animationName, state);
+
+        if (!NetworkRepository.Current.IsServer)
+            return;
+
+        var playerObjectId = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == _player).Id;
+
+        var attackAnimationCmd = new SetPlayerAnimatorBoolCmd(playerObjectId, animationName, state);
+
+        var networkClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == playerObjectId);
+
+        if (networkClient == null)
+            return;
+
+        NetworkBus.OnCommandSendToClientsExcept(attackAnimationCmd, networkClient);
     }
 
     public override void OnInput(PlayerInputs playerInputs)
@@ -44,6 +66,9 @@ public class PlayerAttackState : PlayerStandingState
 
     private void OnHit(IDamagable damagable) 
     {
+        if (!NetworkRepository.Current.IsServer)
+            return;
+
         if (currentComboHits.Contains(damagable))
             return;
 
@@ -57,6 +82,20 @@ public class PlayerAttackState : PlayerStandingState
             return;
 
         damagablePlayer.PlayerStateMachine.ChangeState(new PlayerKnockedState(damagablePlayer, damagablePlayer.transform.position - _player.transform.position));
+
+        var networkObject = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == damagablePlayer);
+        var hitCmd = new HitCmd(networkObject.Id, _player.WeaponController.Weapon.weaponModel.damage);
+
+        var shooterNetworkObject = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == _player);
+        var shooterClient = NetworkRepository.Current.ConnectedClients.First(x => x.ClientObjectId == shooterNetworkObject.Id);
+
+        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, shooterClient);
+
+        var hitClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == networkObject.Id);
+        if (hitClient == null)
+            return;
+
+        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, hitClient);
     }
 
     private void OnCombo()
@@ -77,8 +116,7 @@ public class PlayerAttackState : PlayerStandingState
     {
         base.OnExit();
 
-        _player.Animator.SetBool("Attack", false);
-        _player.Animator.applyRootMotion = false;
+        SetAttackAnimation(false);
 
         _player.WeaponController.Weapon.weaponObject.MeleeTrigger.OnMeleeHit -= OnHit;
         _player.WeaponController.PlayerAnimationEvents.OnAnimationCombo -= OnCombo;

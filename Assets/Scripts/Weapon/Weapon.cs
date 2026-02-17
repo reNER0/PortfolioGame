@@ -19,6 +19,7 @@ public class GunWeapon : Weapon
 
     public GunWeapon(GunModel weaponModel, WeaponPrefab weaponPrefab, Player player) : base(weaponModel, weaponPrefab)
     {
+        this.currentAmmo = weaponModel.ammoCapacity;
         weaponLogic = new GunWeaponLogic(this, weaponModel, player);
     }
 }

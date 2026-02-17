@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class WeaponBox : MonoBehaviour
@@ -12,12 +11,17 @@ public class WeaponBox : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!NetworkRepository.Current.IsServer)
+            return;
+
         var player = other.GetComponent<Player>();
 
         if (player == null)
             return;
 
-        player.WeaponController.PickupWeapon(weaponModel);
+        var equipCmd = new EquipWeaponCmd(NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == player).Id, weaponModel.name);
+
+        NetworkBus.OnPerformCommand?.Invoke(equipCmd);
     }
 
     private void Update()

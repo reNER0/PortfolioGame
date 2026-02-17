@@ -57,6 +57,9 @@ public class PlayerInputController : MonoBehaviour
         if (player.WeaponController.Weapon != null && player.WeaponController.Weapon.weaponObject.muzzle != null)
             aimDirection = lookPoint - player.WeaponController.Weapon.weaponObject.muzzle.position;
 
+        if (player.WeaponController.Weapon != null && player.WeaponController.Weapon.GetType() == typeof(MeleeWeapon))
+            aimDirection = lookPoint - player.transform.position;
+
         Tools.YawPitchFromDirection(aimDirection, out var yaw, out var pitch);
 
         bool fireInput = inputSystem.Inputs.Fire.IsPressed();

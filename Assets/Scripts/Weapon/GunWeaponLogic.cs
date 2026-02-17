@@ -37,8 +37,10 @@ public class GunWeaponLogic : IWeaponLogic
 
 
         // --- VISUAL (local prediction) ---
-        if (fireDown) OnStartShooting();
-        if (fireUp) OnStopShooting();
+        if (fireDown) 
+            OnStartShooting();
+        if (fireUp) 
+            OnStopShooting();
 
         // --- SIMULATION (server authoritative) ---
         if (fireDown)
@@ -93,16 +95,15 @@ public class GunWeaponLogic : IWeaponLogic
         var hitCmd = new HitCmd(networkObject.Id, weapon.weaponModel.damage);
 
         var shooterNetworkObject = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == player);
-        var shooterClient = NetworkRepository.Current.ConnectedClients.First(x => x.ClientObjectId == shooterNetworkObject.Id);
-
-        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, shooterClient);
+        var shooterClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == shooterNetworkObject.Id);
+        if (shooterClient != null)
+            NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, shooterClient);
 
         var hitClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == networkObject.Id);
-        if (hitClient == null)
-            return;
+        if (hitClient != null)
+            NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, hitClient);
 
-        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, hitClient);
-
+        NetworkBus.OnPerformCommand?.Invoke(hitCmd);
 
         Collider GetHit(Vector3 origin, Vector3 direction)
         {
@@ -114,6 +115,8 @@ public class GunWeaponLogic : IWeaponLogic
 
     private void OnStartShooting()
     {
+        OnStopShooting();
+
         ShowVisualTrail();
 
         _shootTween = DOVirtual.DelayedCall(
@@ -126,11 +129,7 @@ public class GunWeaponLogic : IWeaponLogic
 
     private void OnStopShooting()
     {
-        if (_shootTween != null)
-        {
-            _shootTween.Kill();
-            _shootTween = null;
-        }
+        _shootTween?.Kill();
     }
 
 

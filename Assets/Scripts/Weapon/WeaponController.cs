@@ -1,10 +1,7 @@
-using Assets.Scripts.Commands;
 using DG.Tweening;
-using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class WeaponController : MonoBehaviour
 {
@@ -24,6 +21,8 @@ public class WeaponController : MonoBehaviour
     private bool isAiming;
 
     private Tween _layerTween;
+
+    private bool _lastFire;
 
 
     private void Awake()
@@ -82,10 +81,22 @@ public class WeaponController : MonoBehaviour
         if (Weapon.weaponLogic.NeedReload())
         {
             // TODO : make automatic reload
-            return;
         }
 
+        bool fireHeld = playerInputs.Fire;
+        bool fireDown = fireHeld && !_lastFire;
+        bool fireUp = !fireHeld && _lastFire;
+
+
+        // --- VISUAL (local prediction) ---
+        if (fireDown)
+            OnStartShooting();
+        if (fireUp)
+            OnStopShooting();
+
         Weapon.weaponLogic.Attack(playerInputs);
+
+        _lastFire = fireHeld;
     }
 
 
@@ -208,5 +219,40 @@ public class WeaponController : MonoBehaviour
             duration
         )
         .SetEase(Ease.OutSine);
+    }
+
+
+    private void OnStartShooting()
+    {
+        OnStopShooting();
+
+        ShowVisualTrail();
+
+        _shootTween = DOVirtual.DelayedCall(
+            Weapon.weaponModel.fireRate,
+            ShowVisualTrail
+        )
+        .SetLoops(-1, LoopType.Restart)
+        .SetUpdate(UpdateType.Normal);
+    }
+
+    private void OnStopShooting()
+    {
+        _shootTween?.Kill();
+    }
+
+
+    private void ShowVisualTrail()
+    {
+        var camera = Camera.main;
+
+        if (!Physics.Raycast(weapon.weaponObject.muzzle.position, direction, out var hit, weapon.weaponModel.range))
+            return;
+
+        GameBus.OnBulletFX?.Invoke(new BulletFX
+        {
+            StartPosition = weapon.weaponObject.muzzle.position,
+            EndPosition = hit.point
+        });
     }
 }

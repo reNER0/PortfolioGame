@@ -1698,6 +1698,52 @@ MonoBehaviour:
     Tick: 0
   Rigidbody: {fileID: 1288977110}
   serverStateTransform: {fileID: 1403877840}
+--- !u!1 &1386088363
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1386088365}
+  - component: {fileID: 1386088364}
+  m_Layer: 0
+  m_Name: BulletVisualsController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1386088364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386088363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d2b66c8ba54a4b46b794937ce08b099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TrailRendererPrefab: {fileID: 3775525587726423123, guid: f0e116a80762476458372d45362d1391,
+    type: 3}
+--- !u!4 &1386088365
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386088363}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.944889, y: 0.9406558, z: -2.1886606}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1403877839
 GameObject:
   m_ObjectHideFlags: 0
@@ -3387,3 +3433,4 @@ SceneRoots:
   - {fileID: 345907705}
   - {fileID: 1772515989}
   - {fileID: 682914527}
+  - {fileID: 1386088365}

@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leftHandGrip: {fileID: 6799539127399572273}
-  muzzle: {fileID: 0}
+  muzzle: {fileID: 8193708001396071542}
   MeleeTrigger: {fileID: 5407828300320702485}
 --- !u!1 &9151723752137353819
 GameObject:

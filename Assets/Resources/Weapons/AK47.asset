@@ -15,7 +15,7 @@ MonoBehaviour:
   prefab: {fileID: 1856672153254684174, guid: 54cea045fc05afe46875b4152640d6c2, type: 3}
   damage: 10
   range: 100
-  isTwoHanded: 0
+  isTwoHanded: 1
   bulletsPerShot: 1
   spread: 10
   fireRate: 0.5
