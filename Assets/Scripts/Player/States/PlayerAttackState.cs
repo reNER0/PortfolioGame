@@ -87,9 +87,13 @@ public class PlayerAttackState : PlayerStandingState
         var hitCmd = new HitCmd(networkObject.Id, _player.WeaponController.Weapon.weaponModel.damage);
 
         var shooterNetworkObject = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == _player);
-        var shooterClient = NetworkRepository.Current.ConnectedClients.First(x => x.ClientObjectId == shooterNetworkObject.Id);
 
-        NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, shooterClient);
+        var shooterClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == shooterNetworkObject.Id);
+
+        if (shooterClient != null)
+            NetworkBus.OnCommandSendToClient?.Invoke(hitCmd, shooterClient);
+        else
+            NetworkBus.OnPerformCommand?.Invoke(hitCmd);
 
         var hitClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == networkObject.Id);
         if (hitClient == null)

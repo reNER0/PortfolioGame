@@ -289,6 +289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd427e81a29894784bb2943d75791887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grip: 1.5
   vehicleBody: {fileID: 1369844760923331607}
   layerMask:
     serializedVersion: 2
@@ -300,7 +301,6 @@ MonoBehaviour:
   springStiffness: 20000
   damperStiffness: 1000
   fZ: {x: 0, y: 0, z: 0}
-  motorTorque: 1500
   wheelInertia: 5
   wheelAngularVelocity: 0
   linearVelocityLocal: {x: 0, y: 0, z: 0}
@@ -323,7 +323,7 @@ MonoBehaviour:
   wheelbase: 5
   rearTrackLength: 2
   turningRadius: 7
-  steerAngle: 50
+  steerAngle: 65
 --- !u!1 &4073100288086831667
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,6 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd427e81a29894784bb2943d75791887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grip: 1.5
   vehicleBody: {fileID: 1369844760923331607}
   layerMask:
     serializedVersion: 2
@@ -380,7 +381,6 @@ MonoBehaviour:
   springStiffness: 20000
   damperStiffness: 1000
   fZ: {x: 0, y: 0, z: 0}
-  motorTorque: 1500
   wheelInertia: 5
   wheelAngularVelocity: 0
   linearVelocityLocal: {x: 0, y: 0, z: 0}
@@ -775,12 +775,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputSeam: 0
   lastAppliedInputs:
+    Fire: 0
+    Aim: 0
     X: 0
     Y: 0
+    Yaw: 0
+    Pitch: 0
+    QuantizedDir:
+      x: 0
+      y: 0
+      z: 0
     Jump: 0
     Tick: 0
   Rigidbody: {fileID: 1369844760923331607}
   serverStateTransform: {fileID: 2089862823025829589}
+  engine:
+    engineForce: 2500
+    engineCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: -3.2193437
+        outSlope: -3.2193437
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.044444382
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    maxSpeed: 50
+  driveTrain: 2
+  brakeForce: 2000
   seats:
   - {fileID: 6565481519905951269}
   wheels:
@@ -1279,6 +1316,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd427e81a29894784bb2943d75791887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grip: 1.5
   vehicleBody: {fileID: 1369844760923331607}
   layerMask:
     serializedVersion: 2
@@ -1290,7 +1328,6 @@ MonoBehaviour:
   springStiffness: 20000
   damperStiffness: 1000
   fZ: {x: 0, y: 0, z: 0}
-  motorTorque: 1500
   wheelInertia: 5
   wheelAngularVelocity: 0
   linearVelocityLocal: {x: 0, y: 0, z: 0}
@@ -1313,7 +1350,7 @@ MonoBehaviour:
   wheelbase: 5
   rearTrackLength: 2
   turningRadius: 7
-  steerAngle: 50
+  steerAngle: 65
 --- !u!1 &8361461531073019928
 GameObject:
   m_ObjectHideFlags: 0
@@ -1390,6 +1427,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd427e81a29894784bb2943d75791887, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grip: 1.5
   vehicleBody: {fileID: 1369844760923331607}
   layerMask:
     serializedVersion: 2
@@ -1401,7 +1439,6 @@ MonoBehaviour:
   springStiffness: 20000
   damperStiffness: 1000
   fZ: {x: 0, y: 0, z: 0}
-  motorTorque: 1500
   wheelInertia: 5
   wheelAngularVelocity: 0
   linearVelocityLocal: {x: 0, y: 0, z: 0}

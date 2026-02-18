@@ -15,6 +15,8 @@ public class Player : PhysicsObject, IDamagable, IHealth
     private int health = 100;
     private int maxHealth = 100;
 
+    public Vector3 Direction { get; private set; }
+
 
     [SerializeField]
     private float jumpForce;
@@ -76,27 +78,36 @@ public class Player : PhysicsObject, IDamagable, IHealth
     {
         base.Input(playerInputs);
 
+        Direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
+
         PlayerStateMachine.OnInput(playerInputs);
 
         WeaponController.Input(playerInputs);
     }
 
-    
+
     void OnAnimatorMove()
     {
+        if (PlayerStateMachine.currentState.GetType() != typeof(PlayerStandingState))
+            return;
+
         Rigidbody.MovePosition(Rigidbody.position + Animator.deltaPosition);
         //transform.position = transform.position + Animator.deltaPosition;
     }
-    
+
     public override PredictableState GetState()
     {
+        Tools.YawPitchFromDirection(Direction, out var yaw, out var pitch);
+
         return new PlayerSyncState(InputProcessor.ProcessTick,
             Rigidbody.position,
             Rigidbody.velocity,
             Rigidbody.rotation,
             Rigidbody.angularVelocity,
             lastAppliedInputs,
-            health
+            health,
+            yaw,
+            pitch
             );
     }
 
@@ -120,9 +131,9 @@ public class Player : PhysicsObject, IDamagable, IHealth
             return;
         }
 
-        if (health != serverState._health)
+        if (health != serverState.Health)
         {
-            health = serverState._health;
+            health = serverState.Health;
             HealthChanged?.Invoke(health);
         }
 
@@ -132,6 +143,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
             Rigidbody.MoveRotation(serverState.Rotation);
             Rigidbody.velocity = serverState.Velocity;
             Rigidbody.angularVelocity = serverState.RotationVelocity;
+            Direction = Tools.DirectionFromYawPitch(serverState.Yaw, serverState.Pitch);
             return;
         }
 

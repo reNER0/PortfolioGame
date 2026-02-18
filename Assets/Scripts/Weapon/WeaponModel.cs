@@ -20,5 +20,6 @@ public abstract class WeaponModel : ScriptableObject
 
     public int damage = 10;
     public float range = 100;
+    public float fireRate;
     public bool isTwoHanded;
 }

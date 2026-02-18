@@ -1,4 +1,5 @@
 using Assets.Scripts.Commands;
+using Assets.Scripts.Network.Commands;
 using Assets.Scripts.Weapon;
 using DG.Tweening;
 using System.Linq;
@@ -15,9 +16,6 @@ public class GunWeaponLogic : IWeaponLogic
 
     private float _accumulatedTime;
 
-    private Vector3 direction;
-
-    private Tween _shootTween;
 
 
     public GunWeaponLogic(GunWeapon weapon, GunModel gunModel, Player player)
@@ -29,20 +27,18 @@ public class GunWeaponLogic : IWeaponLogic
 
     public void Attack(PlayerInputs playerInputs)
     {
-        direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
-
         bool fireHeld = playerInputs.Fire;
         bool fireDown = fireHeld && !_lastFire;
         bool fireUp = !fireHeld && _lastFire;
 
 
-        // --- VISUAL (local prediction) ---
-        if (fireDown) 
-            OnStartShooting();
-        if (fireUp) 
-            OnStopShooting();
+        // Visual simulation
+        if (fireDown)
+            StartStopVisualShooting(true);
+        if (fireUp)
+            StartStopVisualShooting(false);
 
-        // --- SIMULATION (server authoritative) ---
+        // Shots simulation
         if (fireDown)
         {
             _accumulatedTime = 0f;
@@ -62,6 +58,30 @@ public class GunWeaponLogic : IWeaponLogic
         _lastFire = fireHeld;
     }
 
+    private void StartStopVisualShooting(bool start) 
+    {
+        if (start)
+            player.WeaponController.OnStartShooting();
+        else
+            player.WeaponController.OnStopShooting();
+
+        if (!NetworkRepository.Current.IsServer)
+            return;
+
+        var playerObjectId = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == player).Id;
+
+        var startStopShootingCmd = new StartStopShootingCmd(playerObjectId, start);
+
+        var shooter = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == playerObjectId);
+
+        if (shooter == null) 
+        {
+            NetworkBus.OnCommandSendToClients(startStopShootingCmd);
+            return;
+        }
+
+        NetworkBus.OnCommandSendToClientsExcept(startStopShootingCmd, shooter);
+    }
 
     private void Shot(PlayerInputs playerInputs)
     {
@@ -72,9 +92,7 @@ public class GunWeaponLogic : IWeaponLogic
         if (!NetworkRepository.Current.IsServer)
             return;
 
-        var direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
-
-        var hitCollider = GetHit(weapon.weaponObject.muzzle.position, direction);
+        var hitCollider = GetHit(weapon.weaponObject.muzzle.position, player.Direction);
 
         if (hitCollider == null)
             return;
@@ -113,39 +131,7 @@ public class GunWeaponLogic : IWeaponLogic
         }
     }
 
-    private void OnStartShooting()
-    {
-        OnStopShooting();
 
-        ShowVisualTrail();
-
-        _shootTween = DOVirtual.DelayedCall(
-            weaponModel.fireRate,
-            ShowVisualTrail
-        )
-        .SetLoops(-1, LoopType.Restart)
-        .SetUpdate(UpdateType.Normal);
-    }
-
-    private void OnStopShooting()
-    {
-        _shootTween?.Kill();
-    }
-
-
-    private void ShowVisualTrail()
-    {
-        var camera = Camera.main;
-
-        if (!Physics.Raycast(weapon.weaponObject.muzzle.position, direction, out var hit, weapon.weaponModel.range)) 
-            return;
-
-        GameBus.OnBulletFX?.Invoke(new BulletFX
-        {
-            StartPosition = weapon.weaponObject.muzzle.position,
-            EndPosition = hit.point
-        });
-    }
 
     public bool NeedReload()
     {
@@ -155,5 +141,19 @@ public class GunWeaponLogic : IWeaponLogic
     public void OnReload()
     {
         weapon.currentAmmo = weaponModel.ammoCapacity;
+    }
+
+    public void OnShowVisual()
+    {
+        var camera = Camera.main;
+
+        if (!Physics.Raycast(weapon.weaponObject.muzzle.position, player.Direction, out var hit, weapon.weaponModel.range))
+            return;
+
+        GameBus.OnBulletFX?.Invoke(new BulletFX
+        {
+            StartPosition = weapon.weaponObject.muzzle.position,
+            EndPosition = hit.point
+        });
     }
 }

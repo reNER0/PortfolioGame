@@ -130,6 +130,9 @@ public class PlayerWalkingState : PlayerStandingState
 
         targetDir.y = 0f;
 
+        if (targetDir.magnitude < 0.01f)
+            return;
+
         Quaternion targetRot = Quaternion.LookRotation(targetDir);
         _player.transform.rotation = Quaternion.Lerp(_player.transform.rotation, targetRot, _player.MaxAcceleration * Time.fixedDeltaTime);
     }

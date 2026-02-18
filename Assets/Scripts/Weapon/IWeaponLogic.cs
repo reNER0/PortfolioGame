@@ -5,5 +5,6 @@
         void Attack(PlayerInputs playerInputs);
         bool NeedReload();
         void OnReload();
+        void OnShowVisual();
     }
 }

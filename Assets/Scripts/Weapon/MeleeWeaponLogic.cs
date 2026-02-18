@@ -35,4 +35,6 @@ public class MeleeWeaponLogic : IWeaponLogic
 
     // TODO : do smth with this
     public void OnReload() { }
+
+    public void OnShowVisual() { }
 }

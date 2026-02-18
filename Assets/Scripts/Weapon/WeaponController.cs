@@ -22,7 +22,10 @@ public class WeaponController : MonoBehaviour
 
     private Tween _layerTween;
 
-    private bool _lastFire;
+    //private bool _lastFire;
+
+    private Tween _shootTween;
+
 
 
     private void Awake()
@@ -83,20 +86,15 @@ public class WeaponController : MonoBehaviour
             // TODO : make automatic reload
         }
 
+        /*
         bool fireHeld = playerInputs.Fire;
         bool fireDown = fireHeld && !_lastFire;
         bool fireUp = !fireHeld && _lastFire;
-
-
-        // --- VISUAL (local prediction) ---
-        if (fireDown)
-            OnStartShooting();
-        if (fireUp)
-            OnStopShooting();
+        */
 
         Weapon.weaponLogic.Attack(playerInputs);
 
-        _lastFire = fireHeld;
+        //_lastFire = fireHeld;
     }
 
 
@@ -222,37 +220,21 @@ public class WeaponController : MonoBehaviour
     }
 
 
-    private void OnStartShooting()
+    public void OnStartShooting()
     {
         OnStopShooting();
 
-        ShowVisualTrail();
+        Weapon.weaponLogic.OnShowVisual();
 
         _shootTween = DOVirtual.DelayedCall(
-            Weapon.weaponModel.fireRate,
-            ShowVisualTrail
-        )
-        .SetLoops(-1, LoopType.Restart)
-        .SetUpdate(UpdateType.Normal);
+                Weapon.weaponModel.fireRate,
+                Weapon.weaponLogic.OnShowVisual)
+            .SetLoops(-1, LoopType.Restart)
+            .SetUpdate(UpdateType.Normal);
     }
 
-    private void OnStopShooting()
+    public void OnStopShooting()
     {
         _shootTween?.Kill();
-    }
-
-
-    private void ShowVisualTrail()
-    {
-        var camera = Camera.main;
-
-        if (!Physics.Raycast(weapon.weaponObject.muzzle.position, direction, out var hit, weapon.weaponModel.range))
-            return;
-
-        GameBus.OnBulletFX?.Invoke(new BulletFX
-        {
-            StartPosition = weapon.weaponObject.muzzle.position,
-            EndPosition = hit.point
-        });
     }
 }

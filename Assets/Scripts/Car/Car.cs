@@ -1,9 +1,52 @@
 using System;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+
+
+public enum DriveTrain
+{
+    AWD,
+    FWD,
+    RWD
+}
+
+public enum Gear
+{
+    Drive,
+    Reverse,
+    Parking
+}
+
+[Serializable]
+public struct Engine 
+{
+    public float engineForce;
+    public AnimationCurve engineCurve;
+    public float maxSpeed;
+
+    public float GetEngineForce(float speed)
+    {
+        var speedPercent = speed / maxSpeed;
+
+        if (speedPercent > 1)
+            return 0;
+
+        return engineCurve.Evaluate(speedPercent) * engineForce;
+    }
+}
 
 public class Car : PhysicsObject
 {
+    [SerializeField]
+    private Engine engine;
+
+    [SerializeField]
+    private DriveTrain driveTrain;
+
+    [SerializeField]
+    private float brakeForce;
+
     [SerializeField]
     private Seat[] seats;
 
@@ -18,8 +61,9 @@ public class Car : PhysicsObject
     [SerializeField]
     private Transform centerOfMass;
 
-
     private Quaternion steeringWheelStartRotation;
+
+    private Gear gear = Gear.Parking;
 
 
     private void Awake()
@@ -33,14 +77,81 @@ public class Car : PhysicsObject
     {
         base.Input(playerInputs);
 
+        if (Math.Abs(GetWheelsSpeed()) < 0.1f) 
+        {
+            if (playerInputs.Y < 0 && Rigidbody.velocity.magnitude < 0.1f)
+                gear = Gear.Reverse;
+            else
+                gear = Gear.Drive;
+        }
+
+        float gasInput = 0;
+        float brakeInput = 1;
+        float steerInput = playerInputs.X;
+
+        switch (gear)
+        {
+            case Gear.Drive:
+                gasInput = Math.Max(playerInputs.Y, 0);
+                brakeInput = Math.Max(-playerInputs.Y, 0);
+                break;
+            case Gear.Reverse:
+                gasInput = Math.Min(playerInputs.Y, 0);
+                brakeInput = Math.Max(playerInputs.Y, 0);
+                break;
+        }
+
+        var engineTorque = engine.GetEngineForce(Rigidbody.velocity.magnitude) * gasInput;
+
+        switch (driveTrain)
+        {
+            case DriveTrain.AWD:
+                foreach (var wheel in wheels)
+                    wheel.ApplyTorque(engineTorque / wheels.Length);
+                break;
+            case DriveTrain.FWD:
+                foreach (var wheel in wheels.Take(2))
+                    wheel.ApplyTorque(engineTorque / 2);
+                break;
+            case DriveTrain.RWD:
+                foreach (var wheel in wheels.Skip(2))
+                    wheel.ApplyTorque(engineTorque / (wheels.Length - 2));
+                break;
+        }
+
         foreach (var wheel in wheels)
-            wheel.Process(playerInputs.Y);
+            wheel.Brake(brakeInput * brakeForce);
+
+        foreach (var wheel in wheels)
+            wheel.Process();
 
         foreach (var wheelSteering in wheelSteerings)
-            wheelSteering.Process(playerInputs.X);
+            wheelSteering.Process(steerInput);
 
         steeringWheel.localRotation = steeringWheelStartRotation;
         steeringWheel.Rotate(steeringWheel.forward, steeringWheelAngle * playerInputs.X);
+    }
+
+    private float GetWheelsSpeed()
+    {
+        switch (driveTrain)
+        {
+            case DriveTrain.AWD:
+                return wheels.Average(w => Mathf.Abs(w.GetWheelSpeed()));
+
+            case DriveTrain.FWD:
+                return wheels
+                    .Take(2)
+                    .Average(w => Mathf.Abs(w.GetWheelSpeed()));
+
+            case DriveTrain.RWD:
+                return wheels
+                    .Skip(2)
+                    .Average(w => Mathf.Abs(w.GetWheelSpeed()));
+
+            default:
+                return 0;
+        }
     }
 
     public Seat GetNearestSeat(Vector3 position)
