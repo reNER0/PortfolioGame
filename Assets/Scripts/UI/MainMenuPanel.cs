@@ -19,6 +19,13 @@ public class MainMenuPanel : MonoBehaviour
         clientButton.onClick.AddListener(OnClientButton);
         matchmakingButton.onClick.AddListener(OnMatchmakingButton);
         exitButton.onClick.AddListener(OnExitButton);
+
+
+        if (!LaunchFlags.IsBot)
+            return;
+
+        // Find match if Bot
+        OnMatchmakingButton();
     }
 
 

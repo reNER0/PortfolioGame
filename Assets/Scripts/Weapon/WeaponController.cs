@@ -1,4 +1,6 @@
+using Assets.Scripts.Network.Commands;
 using DG.Tweening;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,7 +20,7 @@ public class WeaponController : MonoBehaviour
 
     private bool isPreparing;
 
-    private bool isAiming;
+    public bool IsAiming { get; private set; }
 
     private Tween _layerTween;
 
@@ -73,7 +75,7 @@ public class WeaponController : MonoBehaviour
         if (Weapon == null)
             return;
 
-        Aim(playerInputs.Aim);
+        //Aim(playerInputs.Aim);
 
         if (isReloading)
             return;
@@ -110,8 +112,24 @@ public class WeaponController : MonoBehaviour
 
     private void Aim(bool aim)
     {
-        isAiming = aim;
-        Animator.SetBool("IsAiming", aim);
+        var animationName = "IsAiming";
+
+        IsAiming = aim;
+        Animator.SetBool(animationName, aim);
+
+        if (!NetworkRepository.Current.IsServer)
+            return;
+
+        var playerObjectId = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == GetComponent<Predictable>()).Id;
+
+        var attackAnimationCmd = new SetPlayerAnimatorBoolCmd(playerObjectId, animationName, aim);
+
+        var networkClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == playerObjectId);
+
+        if (networkClient == null)
+            return;
+
+        NetworkBus.OnCommandSendToClientsExcept(attackAnimationCmd, networkClient);
     }
 
     private void OnReload()
@@ -161,14 +179,14 @@ public class WeaponController : MonoBehaviour
             return;
         }
 
-        if (!isAiming && !isPreparing && !isReloading && !Weapon.weaponModel.isTwoHanded)
+        if (!IsAiming && !isPreparing && !isReloading && !Weapon.weaponModel.isTwoHanded)
         {
             SetLeftHandIK(0);
             SetUpperBodyWeight(0);
             return;
         }
 
-        SetUpperBodyWeight(1);
+        SetUpperBodyWeight(1, 0);
 
 
         if (Weapon.weaponModel.isTwoHanded)
@@ -177,7 +195,7 @@ public class WeaponController : MonoBehaviour
             return;
         }
 
-        if (isAiming) 
+        if (IsAiming) 
         {
             SetLeftHandIK(1);
             return;
@@ -224,6 +242,8 @@ public class WeaponController : MonoBehaviour
     {
         OnStopShooting();
 
+        Aim(true);
+
         Weapon.weaponLogic.OnShowVisual();
 
         _shootTween = DOVirtual.DelayedCall(
@@ -235,6 +255,7 @@ public class WeaponController : MonoBehaviour
 
     public void OnStopShooting()
     {
+        Aim(false);
         _shootTween?.Kill();
     }
 }

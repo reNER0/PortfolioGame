@@ -88,7 +88,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
 
     void OnAnimatorMove()
     {
-        if (PlayerStateMachine.currentState.GetType() != typeof(PlayerStandingState))
+        if (PlayerStateMachine.currentState.GetType() == typeof(PlayerDrivingState))
             return;
 
         Rigidbody.MovePosition(Rigidbody.position + Animator.deltaPosition);

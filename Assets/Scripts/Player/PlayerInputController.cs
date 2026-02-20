@@ -1,5 +1,6 @@
 using System.Linq;
 using Assets.Scripts.Network.Commands;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,6 +12,16 @@ public class PlayerInputController : MonoBehaviour
     private bool jump;
 
     private TickRecorder TickRecorder;
+
+
+
+    public float thinkInterval = 3f;
+
+    private float nextThinkTime;
+
+    private float botX, botY;
+
+    private Player targetPlayer;
 
 
     private void Awake()
@@ -36,6 +47,14 @@ public class PlayerInputController : MonoBehaviour
 
 
     private void Update()
+    {
+        if (LaunchFlags.IsBot)
+            BotUpdate();
+        else
+            ClientUpdate();
+    }
+
+    private void ClientUpdate()
     {
         var playerObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.Current.CurrentObjectId);
 
@@ -92,6 +111,113 @@ public class PlayerInputController : MonoBehaviour
             player.SaveCurrentState(previewTick);
             NetworkBus.OnAllStatesSaved?.Invoke(previewTick);
         }
+    }
+
+    private void BotUpdate()
+    {
+        if (Time.time >= nextThinkTime)
+        {
+            Think();
+            nextThinkTime = Time.time + thinkInterval;
+        }
+
+        var playerObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.Current.CurrentObjectId);
+
+        if (playerObject == null)
+            return;
+
+        var player = (Player)playerObject.Predictable;
+
+        if (player == null)
+            return;
+
+        var direction = player.transform.forward;
+
+        bool shooting = targetPlayer != null && player.WeaponController.Weapon != null;
+
+        if (shooting)
+            direction = targetPlayer.transform.position - player.transform.position;
+
+        Tools.YawPitchFromDirection(direction, out var yaw, out var pitch);
+
+
+        while (previewTick < NetworkTime.CurrentTick)
+        {
+            previewTick++;
+
+            var input = new PlayerInputs(botX, botY, yaw, pitch, jump, shooting, false, previewTick);
+
+            jump = false;
+
+            NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
+
+            // Client prediction
+            if (NetworkRepository.Current.IsServer)
+                return;
+
+            player.Input(input);
+
+            // Maybe extrapolate other players here
+
+            if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
+            {
+                Physics.Simulate(Time.fixedDeltaTime);
+                TickRecorder.RecordTick(previewTick);
+            }
+
+            player.SaveCurrentState(previewTick);
+            NetworkBus.OnAllStatesSaved?.Invoke(previewTick);
+        }
+    }
+
+    void Think()
+    {
+        var maxDistance = 30f;
+
+        var randomPos = new Vector3(Random.Range(-maxDistance, maxDistance), 0, Random.Range(-maxDistance, maxDistance));
+
+        // Random go to weapon
+        if (Random.Range(0, 1f) > 0.5f)
+        {
+            var weaponBoxes = FindObjectsOfType<WeaponBox>();
+            randomPos = weaponBoxes[Random.Range(0, weaponBoxes.Length - 1)].transform.position;
+        }
+
+
+
+        var playerObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == NetworkRepository.Current.CurrentObjectId);
+        if (playerObject == null)
+            return;
+
+        var player = (Player)playerObject.Predictable;
+        if (player == null)
+            return;
+
+        // Random shoot
+        if (Random.Range(0, 1f) > 0.5f)
+        {
+            var players = FindObjectsOfType<Player>().Where(x => x != player).ToArray();
+            targetPlayer = players[Random.Range(0, players.Length - 1)];
+        }
+        else
+        {
+            targetPlayer = null;
+        }
+
+            var direction = randomPos - player.transform.position;
+
+        var maxSpeed = direction.magnitude / thinkInterval;
+
+        var randomSpeed = Random.Range(0, player.MaxSpeed);
+
+        direction.Normalize();
+        direction *= Mathf.Min(randomSpeed, maxSpeed);
+        direction /= player.MaxSpeed;
+
+        botX = direction.x;
+        botY = direction.z;
+
+        Debug.LogError(randomPos);
     }
 
 

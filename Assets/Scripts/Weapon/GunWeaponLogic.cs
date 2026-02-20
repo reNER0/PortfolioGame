@@ -27,6 +27,13 @@ public class GunWeaponLogic : IWeaponLogic
 
     public void Attack(PlayerInputs playerInputs)
     {
+        if (player.WeaponController.IsAiming)
+        {
+            var direction = player.Direction;
+            direction.y = 0;
+            player.transform.forward = direction;
+        }
+
         bool fireHeld = playerInputs.Fire;
         bool fireDown = fireHeld && !_lastFire;
         bool fireUp = !fireHeld && _lastFire;
