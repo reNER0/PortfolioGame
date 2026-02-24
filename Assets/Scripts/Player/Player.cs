@@ -78,9 +78,12 @@ public class Player : PhysicsObject, IDamagable, IHealth
     {
         base.Input(playerInputs);
 
-        Direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
-
         PlayerStateMachine.OnInput(playerInputs);
+
+        if (!NetworkRepository.Current.IsServer && !NetworkRepository.Current.IsCurrentClientOwnerOfObject(this))
+            return;
+
+        Direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
 
         WeaponController.Input(playerInputs);
     }
@@ -117,17 +120,16 @@ public class Player : PhysicsObject, IDamagable, IHealth
         PlayerStateMachine.OnCollisionEnter(collision);
     }
 
-
-    public override void UpdateState(PredictableState state)
+    protected override void FixedUpdate()
     {
         if (PlayerStateMachine.currentState.GetType() == typeof(PlayerDrivingState))
             return;
 
-        var serverState = state as PlayerSyncState;
+        var serverState = lastServerState as PlayerSyncState;
 
         if (serverState == null)
         {
-            Debug.LogError("Error while applying server predictable state!");
+            //Debug.LogError("Error while applying server predictable state!");
             return;
         }
 
@@ -139,12 +141,12 @@ public class Player : PhysicsObject, IDamagable, IHealth
 
         if (!NetworkRepository.Current.IsCurrentClientOwnerOfObject(this))
         {
-            Rigidbody.MovePosition(serverState.Position);
-            Rigidbody.MoveRotation(serverState.Rotation);
-            Rigidbody.velocity = serverState.Velocity;
-            Rigidbody.angularVelocity = serverState.RotationVelocity;
+            //Rigidbody.MovePosition(serverState.Position);
+            //Rigidbody.MoveRotation(serverState.Rotation);
+            //Rigidbody.velocity = serverState.Velocity;
+            //Rigidbody.angularVelocity = serverState.RotationVelocity;
             Direction = Tools.DirectionFromYawPitch(serverState.Yaw, serverState.Pitch);
-            return;
+        //    return;
         }
 
 
@@ -166,11 +168,16 @@ public class Player : PhysicsObject, IDamagable, IHealth
         if (error >= NetworkSettings.MaximumError)
         {
             Reconcilate(serverState);
-
             return;
         }
 
-        SmoothSync(localState as RigidbodyState, serverState);
+        if (NetworkRepository.Current.IsCurrentClientOwnerOfObject(this))
+        {
+            SmoothSync(localState as RigidbodyState, serverState, NetworkSettings.ClientSidePredictionType);
+            return;
+        }
+
+        SmoothSync(localState as RigidbodyState, serverState, NetworkSettings.ErrorCorrectionType);
     }
 
     public void Damage(int damage)

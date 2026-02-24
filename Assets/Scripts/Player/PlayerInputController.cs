@@ -1,7 +1,7 @@
-using System.Linq;
 using Assets.Scripts.Network.Commands;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerInputController : MonoBehaviour
@@ -45,8 +45,7 @@ public class PlayerInputController : MonoBehaviour
         previewTick = tick;
     }
 
-
-    private void Update()
+    private void FixedUpdate()
     {
         if (LaunchFlags.IsBot)
             BotUpdate();
@@ -84,33 +83,46 @@ public class PlayerInputController : MonoBehaviour
         bool fireInput = inputSystem.Inputs.Fire.IsPressed();
         bool aimInput = inputSystem.Inputs.Aim.IsPressed();
 
-        while (previewTick < NetworkTime.CurrentTick)
+        //previewTick++;
+
+        var input = new PlayerInputs(moveDirection.x, moveDirection.y, yaw, pitch, jump, fireInput, aimInput, NetworkTime.CurrentTick);
+
+        jump = false;
+
+        NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
+
+        // Client prediction
+        if (NetworkRepository.Current.IsServer)
+            return;
+
+
+        // Sorting first player objects then other objects
+        var allObjects = NetworkRepository.Current.NetworkObjectById;
+
+        foreach (var predictable in allObjects.Select(x => x.Predictable))
+            predictable.inputSeam = false;
+
+        player.Input(input);
+
+        // Apply Inputs, forces, etc
+        foreach (var networkObject in allObjects)
         {
-            previewTick++;
+            // if input already applied - skip
+            if (networkObject.Predictable.inputSeam)
+                continue;
 
-            var input = new PlayerInputs(moveDirection.x, moveDirection.y, yaw, pitch, jump, fireInput, aimInput, previewTick);
-
-            jump = false;
-
-            NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
-
-            // Client prediction
-            if (NetworkRepository.Current.IsServer)
-                return;
-
-            player.Input(input);
-
-            // Maybe extrapolate other players here
-
-            if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
-            {
-                Physics.Simulate(Time.fixedDeltaTime);
-                TickRecorder.RecordTick(previewTick);
-            }
-
-            player.SaveCurrentState(previewTick);
-            NetworkBus.OnAllStatesSaved?.Invoke(previewTick);
+            networkObject.Predictable.Input(new PlayerInputs(0, 0, 0, 0, false, false, false, NetworkTime.CurrentTick));
         }
+
+
+        if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
+        {
+            Physics.Simulate(Time.fixedDeltaTime);
+            TickRecorder.RecordTick(NetworkTime.CurrentTick);
+        }
+
+        player.SaveCurrentState(NetworkTime.CurrentTick);
+        NetworkBus.OnAllStatesSaved?.Invoke(NetworkTime.CurrentTick);
     }
 
     private void BotUpdate()
@@ -141,33 +153,44 @@ public class PlayerInputController : MonoBehaviour
         Tools.YawPitchFromDirection(direction, out var yaw, out var pitch);
 
 
-        while (previewTick < NetworkTime.CurrentTick)
+        var input = new PlayerInputs(botX, botY, yaw, pitch, jump, shooting, false, NetworkTime.CurrentTick);
+
+        jump = false;
+
+        NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
+
+        // Client prediction
+        if (NetworkRepository.Current.IsServer)
+            return;
+
+
+        // Sorting first player objects then other objects
+        var allObjects = NetworkRepository.Current.NetworkObjectById;
+
+        foreach (var predictable in allObjects.Select(x => x.Predictable))
+            predictable.inputSeam = false;
+
+        player.Input(input);
+
+        // Apply Inputs, forces, etc
+        foreach (var networkObject in allObjects)
         {
-            previewTick++;
+            // if input already applied - skip
+            if (networkObject.Predictable.inputSeam)
+                continue;
 
-            var input = new PlayerInputs(botX, botY, yaw, pitch, jump, shooting, false, previewTick);
-
-            jump = false;
-
-            NetworkBus.OnCommandSendToServer?.Invoke(new InputCmd(input));
-
-            // Client prediction
-            if (NetworkRepository.Current.IsServer)
-                return;
-
-            player.Input(input);
-
-            // Maybe extrapolate other players here
-
-            if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
-            {
-                Physics.Simulate(Time.fixedDeltaTime);
-                TickRecorder.RecordTick(previewTick);
-            }
-
-            player.SaveCurrentState(previewTick);
-            NetworkBus.OnAllStatesSaved?.Invoke(previewTick);
+            networkObject.Predictable.Input(new PlayerInputs(0, 0, 0, 0, false, false, false, NetworkTime.CurrentTick));
         }
+
+
+        if (NetworkSettings.MultiplayerType == MultiplayerType.Physics)
+        {
+            Physics.Simulate(Time.fixedDeltaTime);
+            TickRecorder.RecordTick(NetworkTime.CurrentTick);
+        }
+
+        player.SaveCurrentState(NetworkTime.CurrentTick);
+        NetworkBus.OnAllStatesSaved?.Invoke(NetworkTime.CurrentTick);
     }
 
     void Think()
