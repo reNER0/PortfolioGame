@@ -12,19 +12,6 @@ public class PlayerWalkingState : PlayerStandingState
         base.OnEnter();
     }
 
-    public override void OnUpdate()
-    {
-        var velocity = _player.Rigidbody.velocity;
-
-        if (standingRigidbody != null)
-            velocity -= standingRigidbody.velocity;
-
-        Vector3 localVelocity = _player.transform.InverseTransformDirection(velocity);
-
-        _player.Animator.SetFloat("VelocityX", localVelocity.x / _player.MaxSpeed);
-        _player.Animator.SetFloat("VelocityY", localVelocity.z / _player.MaxSpeed);
-        _player.Animator.SetBool("IsGrounded", isGrounded);
-    }
 
     public override void OnAnimatorIK(int layer)
     {

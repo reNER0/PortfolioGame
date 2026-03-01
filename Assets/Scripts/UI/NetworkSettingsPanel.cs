@@ -14,30 +14,51 @@ public class NetworkSettingsPanel : MonoBehaviour
     private Slider syncForceSlider;
 
 
+    [SerializeField]
+    private TMP_Dropdown clientSidePredictionDropdown;
     [SerializeField] 
-    private TMP_Dropdown dropdown;
+    private TMP_Dropdown errorCorrectionDropdown;
 
-    private void SetMode(int index)
-    {
-        NetworkSettings.ErrorCorrectionType = (ErrorCorrectionType)index;
-    }
 
     private void Awake()
     {
-        var options = Enum.GetNames(typeof(ErrorCorrectionType)).ToList();
-        dropdown.ClearOptions();
-        dropdown.AddOptions(options);
-
-        dropdown.onValueChanged.AddListener(SetMode);
-        SetMode(dropdown.value);
+        SetupDropdowns();
 
         maximumErrorInputField.text = NetworkSettings.MaximumError.ToString();
         maximumErrorInputField.onValueChanged.AddListener(OnMaximumErrorInputField);
 
-        syncForceSlider.value = NetworkSettings.SyncForce;
+        syncForceSlider.SetValueWithoutNotify(NetworkSettings.SyncForce);
         syncForceSlider.onValueChanged.AddListener(OnSyncForceInputField);
     }
 
+
+    private void SetupDropdowns() 
+    {
+        var options = Enum.GetNames(typeof(ErrorCorrectionType)).ToList();
+
+        clientSidePredictionDropdown.ClearOptions();
+        errorCorrectionDropdown.ClearOptions();
+
+        clientSidePredictionDropdown.AddOptions(options);
+        errorCorrectionDropdown.AddOptions(options);
+
+        clientSidePredictionDropdown.onValueChanged.AddListener(OnClientSidePredictionDropdown);
+        errorCorrectionDropdown.onValueChanged.AddListener(OnErrorCorrectionDropdown);
+
+        clientSidePredictionDropdown.SetValueWithoutNotify((int)NetworkSettings.ClientSidePredictionType);
+        errorCorrectionDropdown.SetValueWithoutNotify((int)NetworkSettings.ErrorCorrectionType);
+    }
+
+
+    private void OnClientSidePredictionDropdown(int index)
+    {
+        NetworkSettings.ClientSidePredictionType = (ErrorCorrectionType)index;
+    }
+
+    private void OnErrorCorrectionDropdown(int index)
+    {
+        NetworkSettings.ErrorCorrectionType = (ErrorCorrectionType)index;
+    }
 
     private void OnMaximumErrorInputField(string input)
     {

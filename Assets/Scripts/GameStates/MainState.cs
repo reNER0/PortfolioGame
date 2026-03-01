@@ -57,7 +57,7 @@ public class MainState : State
 
     private void SpawnPlayer(NetworkClient client)
     {
-        var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(NetworkRepository.Current.CurrentCliendId);
+        var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(client.ClientId);
 
         if (spawnTransform == null)
         {
