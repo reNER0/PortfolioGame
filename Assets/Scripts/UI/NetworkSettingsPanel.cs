@@ -8,6 +8,11 @@ using UnityEngine.UI;
 public class NetworkSettingsPanel : MonoBehaviour
 {
     [SerializeField]
+    private TMP_InputField springForceField;
+    [SerializeField]
+    private TMP_InputField dampingForceField;
+
+    [SerializeField]
     private TMP_InputField maximumErrorInputField;
 
     [SerializeField]
@@ -23,6 +28,12 @@ public class NetworkSettingsPanel : MonoBehaviour
     private void Awake()
     {
         SetupDropdowns();
+
+        springForceField.text = NetworkSettings.SpringForce.ToString();
+        springForceField.onValueChanged.AddListener(OnSpringForceField);
+
+        dampingForceField.text = NetworkSettings.DampingForce.ToString();
+        dampingForceField.onValueChanged.AddListener(OnDampingForceField);
 
         maximumErrorInputField.text = NetworkSettings.MaximumError.ToString();
         maximumErrorInputField.onValueChanged.AddListener(OnMaximumErrorInputField);
@@ -66,6 +77,22 @@ public class NetworkSettingsPanel : MonoBehaviour
             return;
 
         NetworkSettings.MaximumError = maximumError;
+    }
+
+    private void OnSpringForceField(string input)
+    {
+        if (!float.TryParse(input, out float value))
+            return;
+
+        NetworkSettings.SpringForce = value;
+    }
+
+    private void OnDampingForceField(string input)
+    {
+        if (!float.TryParse(input, out float value))
+            return;
+
+        NetworkSettings.DampingForce = value;
     }
 
     private void OnSyncForceInputField(float input)
