@@ -19,6 +19,9 @@ public class PlayerStandingState : PlayerState
     protected Rigidbody standingRigidbody;
     protected RaycastHit hit;
 
+    private Vector3 lastPosition;
+    private Vector3 simulatedVelocity;
+
 
     public PlayerStandingState(Player player, float sleepTime = 0) : base(player)
     {
@@ -33,16 +36,20 @@ public class PlayerStandingState : PlayerState
 
     public override void OnUpdate()
     {
-        var velocity = _player.Rigidbody.velocity;
+        var velocity = (_player.transform.position - lastPosition) / Time.deltaTime;
 
         if (standingRigidbody != null)
             velocity -= standingRigidbody.velocity;
 
         Vector3 localVelocity = _player.transform.InverseTransformDirection(velocity);
 
-        _player.Animator.SetFloat("VelocityX", localVelocity.x / _player.MaxSpeed);
-        _player.Animator.SetFloat("VelocityY", localVelocity.z / _player.MaxSpeed);
+        simulatedVelocity = Vector3.Lerp(simulatedVelocity, localVelocity, 1/15f);
+
+        _player.Animator.SetFloat("VelocityX", simulatedVelocity.x / _player.MaxSpeed);
+        _player.Animator.SetFloat("VelocityY", simulatedVelocity.z / _player.MaxSpeed);
         _player.Animator.SetBool("IsGrounded", isGrounded);
+
+        lastPosition = _player.transform.position;
     }
 
     public override void OnAnimatorIK(int layer)
