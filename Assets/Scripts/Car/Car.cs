@@ -218,7 +218,7 @@ public class Car : PhysicsObject
             return;
         }
 
-        if (NetworkRepository.Current.IsCurrentClientOwnerOfObject(this))
+        if (driver != null && NetworkRepository.Current.IsCurrentClientOwnerOfObject(driver))
         {
             SmoothSync(localState as RigidbodyState, serverState, NetworkSettings.ClientSidePredictionType);
             return;
