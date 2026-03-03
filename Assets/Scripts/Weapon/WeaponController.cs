@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.InputSystem.LowLevel.InputStateHistory;
 
 public class WeaponController : MonoBehaviour
 {
@@ -16,15 +17,13 @@ public class WeaponController : MonoBehaviour
 
     public Weapon Weapon;
 
-    private bool isReloading;
+    public bool isReloading { get; private set; }
 
     private bool isPreparing;
 
     public bool IsAiming { get; private set; }
 
     private Tween _layerTween;
-
-    //private bool _lastFire;
 
     private Tween _shootTween;
 
@@ -42,14 +41,14 @@ public class WeaponController : MonoBehaviour
     private void Start()
     {
         if (NetworkRepository.Current.IsCurrentClientOwnerOfObject(GetComponent<Predictable>()))
-            PlayerInputController.inputSystem.Inputs.Reload.performed += OnReload;
+            PlayerInputController.inputSystem.Inputs.Reload.performed += OnReloadButton;
 
         PlayerAnimationEvents.OnReloadAnimationFinished += OnReloadAnimationFinished;
         PlayerAnimationEvents.OnPrepareAnimationFinished += OnPrepareAnimationFinished;
     }
     private void OnDestroy()
     {
-        PlayerInputController.inputSystem.Inputs.Reload.performed -= OnReload;
+        PlayerInputController.inputSystem.Inputs.Reload.performed -= OnReloadButton;
 
         PlayerAnimationEvents.OnReloadAnimationFinished -= OnReloadAnimationFinished;
         PlayerAnimationEvents.OnPrepareAnimationFinished -= OnPrepareAnimationFinished;
@@ -69,8 +68,11 @@ public class WeaponController : MonoBehaviour
         GameBus.OnLocalWeaponPickup?.Invoke(Weapon);
     }
 
-    private void OnReload(InputAction.CallbackContext context)
+    private void OnReloadButton(InputAction.CallbackContext context)
     {
+        if (Weapon == null)
+            return;
+
         OnReload();
     }
 
@@ -80,43 +82,50 @@ public class WeaponController : MonoBehaviour
         if (Weapon == null)
             return;
 
-        if (isReloading)
-            return;
-
         if (isPreparing)
             return;
 
-        if (Weapon.weaponLogic.NeedReload())
+        if (Weapon.weaponLogic.NeedReload() && NetworkRepository.Current.IsCurrentClientOwnerOfObject(GetComponent<Predictable>()))
         {
-            // TODO : make automatic reload
+            OnReload();
         }
 
-
-        //bool fireHeld = playerInputs.Fire;
-        //bool aimHeld = playerInputs.Aim;
-        //bool fireDown = fireHeld && !_lastFire;
-        //bool fireUp = !fireHeld && _lastFire;
-
         Weapon.weaponLogic.Attack(playerInputs);
-
-        //_lastFire = fireHeld;
     }
 
+    public void OnReload() 
+    {
+        isReloading = true;
+        ReloadAnimation(true);
 
+        if (NetworkRepository.Current.IsServer)
+            return;
+
+        var reloadCmd = new StartReloadingCmd();
+        NetworkBus.OnCommandSendToServer(reloadCmd);
+    }
 
     public void Aim(bool aim)
     {
-        var animationName = "IsAiming";
-
         IsAiming = aim;
-        Animator.SetBool(animationName, aim);
+        SetAnimation("IsAiming", aim);
+    }
+
+    private void ReloadAnimation(bool reload) 
+    {
+        SetAnimation("IsReloading", reload);
+    }
+
+    private void SetAnimation(string animationName, bool state) 
+    {
+        Animator.SetBool(animationName, state);
 
         if (!NetworkRepository.Current.IsServer)
             return;
 
         var playerObjectId = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == GetComponent<Predictable>()).Id;
 
-        var attackAnimationCmd = new SetPlayerAnimatorBoolCmd(playerObjectId, animationName, aim);
+        var attackAnimationCmd = new SetPlayerAnimatorBoolCmd(playerObjectId, animationName, state);
 
         var networkClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == playerObjectId);
 
@@ -126,37 +135,9 @@ public class WeaponController : MonoBehaviour
         NetworkBus.OnCommandSendToClientsExcept(attackAnimationCmd, networkClient);
     }
 
-    private void OnReload()
-    {
-        isReloading = true;
-        OnReloadAnimationStarted();
-    }
-
-    public void OnReloadAnimationStarted()
-    {
-        Animator.SetBool("IsReloading", true);
-
-        var animationName = "IsReloading";
-
-        Animator.SetBool(animationName, true);
-
-        if (!NetworkRepository.Current.IsServer)
-            return;
-
-        var playerObjectId = NetworkRepository.Current.NetworkObjectById.First(x => x.Predictable == GetComponent<Predictable>()).Id;
-
-        var attackAnimationCmd = new SetPlayerAnimatorBoolCmd(playerObjectId, animationName, true);
-
-        var networkClient = NetworkRepository.Current.ConnectedClients.FirstOrDefault(x => x.ClientObjectId == playerObjectId);
-
-        if (networkClient == null)
-            return;
-
-        NetworkBus.OnCommandSendToClientsExcept(attackAnimationCmd, networkClient);
-    }
     public void OnReloadAnimationFinished()
     {
-        Animator.SetBool("IsReloading", false);
+        ReloadAnimation(false);
         OnReloadFinished();
     }
 
@@ -164,7 +145,7 @@ public class WeaponController : MonoBehaviour
     {
         isReloading = false;
         Weapon.weaponLogic.OnReload();
-        OnPrepare();
+        //OnPrepare();
     }
 
     private void OnPrepare()

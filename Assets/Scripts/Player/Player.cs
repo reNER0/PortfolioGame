@@ -85,6 +85,9 @@ public class Player : PhysicsObject, IDamagable, IHealth
 
         Direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
 
+        if (PlayerStateMachine.currentState.GetType() != typeof(PlayerWalkingState))
+            return;
+
         WeaponController.Input(playerInputs);
     }
 

@@ -16,7 +16,7 @@ public class GunWeaponLogic : IWeaponLogic
 
     private float _accumulatedTime;
 
-
+    private bool visualShooting;
 
     public GunWeaponLogic(GunWeapon weapon, GunModel gunModel, Player player)
     {
@@ -60,9 +60,10 @@ public class GunWeaponLogic : IWeaponLogic
         }
 
         var canShoot = weapon.CanShoot();
+        var needToStartShooting = canShoot && !visualShooting && (fireDown || fireHeld);
 
         // Visual simulation
-        if (fireDown && canShoot)
+        if (needToStartShooting)
             StartStopVisualShooting(true);
         if (fireUp || !canShoot)
             StartStopVisualShooting(false);
@@ -91,6 +92,8 @@ public class GunWeaponLogic : IWeaponLogic
 
     private void StartStopVisualShooting(bool start) 
     {
+        visualShooting = start;
+
         if (start)
             player.WeaponController.OnStartShooting();
         else
