@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class WheelMesh : MonoBehaviour
 {
-    public Wheel wheel;
+    public SpringWheel wheel;
     public WheelSteering steering;
     float wheelRot;
 

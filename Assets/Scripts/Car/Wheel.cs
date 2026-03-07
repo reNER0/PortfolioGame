@@ -101,7 +101,8 @@ public class Wheel : MonoBehaviour
     void GetWheelMotionOnGround()
     {
         //Get the velocity of the wheel relative to the ground
-        linearVelocityLocal = transform.InverseTransformDirection(vehicleBody.GetPointVelocity(hit.point)); //RB.GetPointVelocity Does Not Update w/ Substeps, If There's A Way To Get This Value Without The Use Of RB Functions, We Can Substep The Whole VP Implementation And Keep The Timestep @ 0.02
+        //RB.GetPointVelocity Does Not Update w/ Substeps, If There's A Way To Get This Value Without The Use Of RB Functions, We Can Substep The Whole VP Implementation And Keep The Timestep @ 0.02
+        linearVelocityLocal = transform.InverseTransformDirection(vehicleBody.GetPointVelocity(hit.point)); 
         angularVelocityLocal = linearVelocityLocal / wheelRadius; // omega = v / r
 
         //Lateral and longitudinal directions of motion of the wheel

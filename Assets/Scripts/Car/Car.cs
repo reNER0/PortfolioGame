@@ -51,7 +51,7 @@ public class Car : PhysicsObject
     private Seat[] seats;
 
     [SerializeField]
-    private Wheel[] wheels;
+    private SpringWheel[] wheels;
     [SerializeField]
     private WheelSteering[] wheelSteerings;
     [SerializeField]
@@ -77,7 +77,7 @@ public class Car : PhysicsObject
     {
         base.Input(playerInputs);
 
-        if (Math.Abs(GetWheelsSpeed()) < 0.1f) 
+        if (Math.Abs(GetWheelsSpeed()) < 0.25f) 
         {
             if (playerInputs.Y < 0 && Rigidbody.velocity.magnitude < 0.1f)
                 gear = Gear.Reverse;
