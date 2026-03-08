@@ -226,7 +226,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gripX: 10
   gripY: 7
-  gripDamping: 1.5
+  gripDamping: 2
   maxSlip: 0.3
   slipJumpPercent: 0.3
   vehicleBody: {fileID: 1369844760923331607}
@@ -238,9 +238,10 @@ MonoBehaviour:
   wheelRadius: 0.4
   currentLength: 0
   springStiffness: 20000
-  damperStiffness: 1000
+  damperStiffness: 1500
   fZ: {x: 0, y: 0, z: 0}
   wheelWeight: 100
+  wheelDamping: 10
   wheelAngularVelocity: 0
   localVelocity: {x: 0, y: 0, z: 0}
   fX: {x: 0, y: 0, z: 0}
@@ -718,7 +719,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gripX: 10
   gripY: 7
-  gripDamping: 1.5
+  gripDamping: 2
   maxSlip: 0.3
   slipJumpPercent: 0.3
   vehicleBody: {fileID: 1369844760923331607}
@@ -730,9 +731,10 @@ MonoBehaviour:
   wheelRadius: 0.4
   currentLength: 0
   springStiffness: 20000
-  damperStiffness: 1000
+  damperStiffness: 1500
   fZ: {x: 0, y: 0, z: 0}
   wheelWeight: 100
+  wheelDamping: 10
   wheelAngularVelocity: 0
   localVelocity: {x: 0, y: 0, z: 0}
   fX: {x: 0, y: 0, z: 0}
@@ -962,7 +964,7 @@ MonoBehaviour:
   Rigidbody: {fileID: 1369844760923331607}
   serverStateTransform: {fileID: 2089862823025829589}
   engine:
-    engineForce: 15000
+    engineForce: 10000
     engineCurve:
       serializedVersion: 2
       m_Curve:
@@ -1070,7 +1072,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gripX: 10
   gripY: 7
-  gripDamping: 1.5
+  gripDamping: 2
   maxSlip: 0.3
   slipJumpPercent: 0.3
   vehicleBody: {fileID: 1369844760923331607}
@@ -1082,9 +1084,10 @@ MonoBehaviour:
   wheelRadius: 0.4
   currentLength: 0
   springStiffness: 20000
-  damperStiffness: 1000
+  damperStiffness: 1500
   fZ: {x: 0, y: 0, z: 0}
   wheelWeight: 100
+  wheelDamping: 10
   wheelAngularVelocity: 0
   localVelocity: {x: 0, y: 0, z: 0}
   fX: {x: 0, y: 0, z: 0}
@@ -1154,7 +1157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gripX: 10
   gripY: 7
-  gripDamping: 1.5
+  gripDamping: 2
   maxSlip: 0.3
   slipJumpPercent: 0.3
   vehicleBody: {fileID: 1369844760923331607}
@@ -1166,9 +1169,10 @@ MonoBehaviour:
   wheelRadius: 0.4
   currentLength: 0
   springStiffness: 20000
-  damperStiffness: 1000
+  damperStiffness: 1500
   fZ: {x: 0, y: 0, z: 0}
   wheelWeight: 100
+  wheelDamping: 10
   wheelAngularVelocity: 0
   localVelocity: {x: 0, y: 0, z: 0}
   fX: {x: 0, y: 0, z: 0}

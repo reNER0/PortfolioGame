@@ -33,6 +33,7 @@ public class SpringWheel : MonoBehaviour
     //Wheel Motion
     float totalTorque;
     public float wheelWeight;
+    public float wheelDamping;
     public float wheelAngularVelocity;
     public Vector3 localVelocity;
     // Estimated angular velocity based on the local velocity of the wheel and its radius
@@ -152,7 +153,7 @@ public class SpringWheel : MonoBehaviour
 
     void CalculateLongitudinalFriction()
     {
-        int substeps = 10;
+        int substeps = 5;
         float subDT = Time.fixedDeltaTime / (float)substeps;
         var accumulatedForce = Vector3.zero;
         //float slipSpeedPeak = 4f;
@@ -160,17 +161,19 @@ public class SpringWheel : MonoBehaviour
         {
             float inertia = 0.5f * wheelWeight * wheelRadius * wheelRadius;
 
+            float angularAcceleration = 0;
+
             // Угловое ускорение от силы мотора
             float torque = driveTorqueInput * wheelRadius;
-            float angularAcceleration = torque / inertia;
+            var slipLimit = (Math.Abs(localVelocity.z) + 30) / wheelRadius;
+            if(Math.Abs(wheelAngularVelocity) < slipLimit)
+                angularAcceleration += torque / inertia;
 
             float brakeTorque = brakeTorqueInput * wheelRadius;
             angularAcceleration -= Math.Sign(wheelAngularVelocity) * brakeTorque / inertia;
 
             // Новая угловая скорость
             wheelAngularVelocity += angularAcceleration * subDT;
-            var slipLimit = (Math.Abs(localVelocity.z) + 20) / wheelRadius;
-            wheelAngularVelocity = Mathf.Clamp(wheelAngularVelocity, -slipLimit, slipLimit);
 
             // Линейная скорость обода колеса
             var linearVelocity = wheelAngularVelocity * wheelRadius;
@@ -179,7 +182,6 @@ public class SpringWheel : MonoBehaviour
 
 
             var springVector = gripPoint - hit.point;
-
             bool slipped = springVector.magnitude > maxSlip;
 
             if (slipped)
@@ -201,26 +203,30 @@ public class SpringWheel : MonoBehaviour
 
             //var longitudinalSpringDistance = linearVelocity - localVelocity.z;
 
-            var force = longitudinalSpringDistance * gripY + gripDamping * (longitudinalSpringDistance - lastValue) / subDT;
-            force *= suspensionForce;
+            var groundForce = longitudinalSpringDistance * gripY;
+            groundForce *= suspensionForce;
+            var wheelForce = longitudinalSpringDistance * gripY;
+            wheelForce *= suspensionForce;
+            wheelForce += wheelWeight * wheelDamping * (longitudinalSpringDistance - lastWheelValue) / subDT;
             //var force = longitudinalSpringDistance * grip - gripDamping * localVelocity.z / subDT;
 
             // Угловое ускорение от силы земли
-            float torqueFromGround = force * wheelRadius; // момент
+            float torqueFromGround = wheelForce * wheelRadius; // момент
             float angularAccelFromGround = torqueFromGround / inertia;
 
             // Новая угловая скорость
             wheelAngularVelocity -= angularAccelFromGround * subDT;
 
-            accumulatedForce += longitudinalDir * force;
+            accumulatedForce += longitudinalDir * groundForce;
             //fY = longitudinalDir * force;
-            lastValue = longitudinalSpringDistance;
+
+            lastWheelValue = longitudinalSpringDistance;
         }
 
         fY = accumulatedForce / (float)substeps;
 
     }
-    private float lastValue;
+    private float lastWheelValue;
 
     void GetWheelMotionInAir()
     {
