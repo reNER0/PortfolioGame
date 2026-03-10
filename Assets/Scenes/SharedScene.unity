@@ -1665,7 +1665,6 @@ GameObject:
   - component: {fileID: 444109413}
   - component: {fileID: 444109417}
   - component: {fileID: 444109416}
-  - component: {fileID: 444109415}
   - component: {fileID: 444109414}
   m_Layer: 5
   m_Name: Ammo (1)
@@ -1707,19 +1706,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 2
---- !u!114 &444109415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 444109412}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ecda7064d5a1405786964d335845252, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pingText: {fileID: 444109416}
 --- !u!114 &444109416
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3932,7 +3918,6 @@ GameObject:
   - component: {fileID: 1154686557}
   - component: {fileID: 1154686561}
   - component: {fileID: 1154686560}
-  - component: {fileID: 1154686559}
   - component: {fileID: 1154686558}
   m_Layer: 5
   m_Name: Ammo
@@ -3974,19 +3959,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 2
---- !u!114 &1154686559
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1154686556}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ecda7064d5a1405786964d335845252, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pingText: {fileID: 1154686560}
 --- !u!114 &1154686560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5496,7 +5468,6 @@ GameObject:
   - component: {fileID: 1361220540}
   - component: {fileID: 1361220544}
   - component: {fileID: 1361220543}
-  - component: {fileID: 1361220542}
   - component: {fileID: 1361220541}
   m_Layer: 5
   m_Name: Ammo (2)
@@ -5538,19 +5509,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 2
---- !u!114 &1361220542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1361220539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ecda7064d5a1405786964d335845252, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pingText: {fileID: 1361220543}
 --- !u!114 &1361220543
 MonoBehaviour:
   m_ObjectHideFlags: 0
