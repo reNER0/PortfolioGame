@@ -194,7 +194,8 @@ public class GunWeaponLogic : IWeaponLogic
         GameBus.OnBulletFX?.Invoke(new BulletFX
         {
             StartPosition = weapon.weaponObject.muzzle.position,
-            EndPosition = hit.point
+            EndPosition = hit.point,
+            HitNormal = hit.normal
         });
     }
 }

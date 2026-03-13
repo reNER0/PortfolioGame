@@ -2264,8 +2264,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upperMount: {fileID: 968994517}
   camera: {fileID: 1215744963}
-  zoomMultiplier: 0.5
-  sensitivity: 1
+  zoomSpeed: 60
+  zoomMultiplier: 0.3
+  sensitivity: 0.5
   height: 2
   side: 1.16
   angle: 20
@@ -5672,6 +5673,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TrailRendererPrefab: {fileID: 3775525587726423123, guid: f0e116a80762476458372d45362d1391,
+    type: 3}
+  HitEffectPrefab: {fileID: 1111963339178560943, guid: 5c46d75aa00e98a409c19c364f85b54f,
     type: 3}
 --- !u!4 &1386088365
 Transform:

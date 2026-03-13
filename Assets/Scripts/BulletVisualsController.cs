@@ -6,16 +6,23 @@ using UnityEngine;
 public class BulletVisualsController : MonoBehaviour
 {
     public TrailRenderer TrailRendererPrefab;
+    public ParticleSystem HitEffectPrefab;
 
     private void Start()
     {
         GameBus.OnBulletFX += OnBulletFX;
     }
 
-    private void OnBulletFX(BulletFX bulletFX) 
+    private void OnBulletFX(BulletFX bulletFX)
     {
         var trail = Instantiate(TrailRendererPrefab, bulletFX.StartPosition, Quaternion.identity);
-        trail.transform.DOMove(bulletFX.EndPosition, 0.05f).OnComplete(() => { Destroy(trail.gameObject, trail.time); });
+        trail.transform.DOMove(bulletFX.EndPosition, 0.05f).OnComplete(OnHit);
+
+        void OnHit()
+        {
+            Destroy(trail.gameObject, trail.time);
+            Instantiate(HitEffectPrefab, bulletFX.EndPosition, Quaternion.LookRotation(bulletFX.HitNormal));
+        }
     }
 
     private void OnDestroy()
@@ -28,4 +35,5 @@ public class BulletFX
 {
     public Vector3 StartPosition;
     public Vector3 EndPosition;
+    public Vector3 HitNormal;
 }
