@@ -173,18 +173,19 @@ public class Car : PhysicsObject
     }
 
 
-    public override void UpdateState(PredictableState state)
+    protected override void FixedUpdate()
     {
-        var serverState = state as RigidbodyState;
+        var serverState = lastServerState as RigidbodyState;
 
         if (serverState == null)
         {
-            Debug.LogError("Error while applying server predictable state!");
+            //Debug.LogError("Error while applying server predictable state!");
             return;
         }
 
         var driver = seats.FirstOrDefault().Player;
 
+        /*
         if (driver == null || !NetworkRepository.Current.IsCurrentClientOwnerOfObject(driver))
         {
             Rigidbody.MovePosition(serverState.Position);
@@ -193,7 +194,7 @@ public class Car : PhysicsObject
             Rigidbody.angularVelocity = serverState.RotationVelocity;
             return;
         }
-
+        */
 
         serverStateTransform.position = serverState.Position;
         serverStateTransform.rotation = serverState.Rotation;
@@ -217,6 +218,12 @@ public class Car : PhysicsObject
             return;
         }
 
-        SmoothSync(localState as RigidbodyState, serverState);
+        if (driver != null && NetworkRepository.Current.IsCurrentClientOwnerOfObject(driver))
+        {
+            SmoothSync(localState as RigidbodyState, serverState, NetworkSettings.ClientSidePredictionType);
+            return;
+        }
+
+        SmoothSync(localState as RigidbodyState, serverState, NetworkSettings.ErrorCorrectionType);
     }
 }

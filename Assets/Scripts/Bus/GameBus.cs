@@ -6,4 +6,5 @@ public static class GameBus
     public static Action<Predictable, int> OnPredictableHit;
     public static Action OnBadEffect;
     public static Action<BulletFX> OnBulletFX;
+    public static Action<Weapon> OnLocalWeaponPickup;
 }

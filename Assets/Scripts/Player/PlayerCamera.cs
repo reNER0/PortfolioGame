@@ -10,6 +10,10 @@ public class PlayerCamera : Singleton<PlayerCamera>
     private Transform camera;
 
     [SerializeField]
+    private float zoomSpeed = 15f;
+    [SerializeField]
+    private float zoomMultiplier;
+    [SerializeField]
     private float sensitivity;
     [SerializeField]
     private float height;
@@ -29,6 +33,14 @@ public class PlayerCamera : Singleton<PlayerCamera>
     private Vector3 lastPosition;
     private bool fixedState;
     private float currentAngle;
+    private bool isZooming;
+    private float currentDistance;
+
+
+    private void Start()
+    {
+        currentDistance = distance;
+    }
 
     private void FixedUpdate()
     {
@@ -55,7 +67,9 @@ public class PlayerCamera : Singleton<PlayerCamera>
         }
 
         upperMount.localEulerAngles = new Vector3(currentAngle, 0, 0);
-        camera.localPosition = Vector3.back * distance;
+
+        currentDistance = Mathf.MoveTowards(currentDistance, isZooming ? distance * zoomMultiplier : distance, Time.fixedDeltaTime * zoomSpeed);
+        camera.localPosition = Vector3.back * currentDistance;
         camera.localRotation = Quaternion.identity;
 
         var deltaPosition = player.Rigidbody.position - lastPosition;
@@ -79,6 +93,11 @@ public class PlayerCamera : Singleton<PlayerCamera>
         transform.position = player.Rigidbody.position;
 
         lastPosition = player.Rigidbody.position;
+    }
+
+    public void Zoom(bool zoom)
+    {
+        isZooming = zoom;
     }
 
     public Vector3 GetLookPoint()

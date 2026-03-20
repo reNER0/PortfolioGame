@@ -16,7 +16,7 @@ public class GunWeaponLogic : IWeaponLogic
 
     private float _accumulatedTime;
 
-
+    private bool visualShooting;
 
     public GunWeaponLogic(GunWeapon weapon, GunModel gunModel, Player player)
     {
@@ -27,6 +27,31 @@ public class GunWeaponLogic : IWeaponLogic
 
     public void Attack(PlayerInputs playerInputs)
     {
+        bool fireHeld = playerInputs.Fire;
+        bool aimHeld = playerInputs.Aim;
+        bool fireDown = fireHeld && !_lastFire;
+        bool fireUp = !fireHeld && _lastFire;
+
+
+        bool needToAim = fireHeld || aimHeld;
+
+        if (needToAim && !player.WeaponController.IsAiming)
+        {
+            if (aimHeld && NetworkRepository.Current.IsCurrentClientOwnerOfObject(player))
+            {
+                PlayerCamera.Instance.Zoom(true);
+            }
+
+            player.WeaponController.Aim(true);
+        }
+
+        if (!needToAim && player.WeaponController.IsAiming)
+        {
+            PlayerCamera.Instance.Zoom(false);
+            player.WeaponController.Aim(false);
+        }
+
+
         if (player.WeaponController.IsAiming)
         {
             var direction = player.Direction;
@@ -34,21 +59,21 @@ public class GunWeaponLogic : IWeaponLogic
             player.transform.forward = direction;
         }
 
-        bool fireHeld = playerInputs.Fire;
-        bool fireDown = fireHeld && !_lastFire;
-        bool fireUp = !fireHeld && _lastFire;
-
+        var canShoot = weapon.CanShoot();
+        var needToStartShooting = canShoot && !visualShooting && (fireDown || fireHeld);
 
         // Visual simulation
-        if (fireDown)
+        if (needToStartShooting)
             StartStopVisualShooting(true);
-        if (fireUp)
+        if (fireUp || !canShoot)
             StartStopVisualShooting(false);
+
+        if (!canShoot)
+            return;
 
         // Shots simulation
         if (fireDown)
         {
-            _accumulatedTime = 0f;
             Shot(playerInputs); // первый выстрел сразу
         }
         else if (fireHeld)
@@ -67,6 +92,8 @@ public class GunWeaponLogic : IWeaponLogic
 
     private void StartStopVisualShooting(bool start) 
     {
+        visualShooting = start;
+
         if (start)
             player.WeaponController.OnStartShooting();
         else
@@ -92,9 +119,7 @@ public class GunWeaponLogic : IWeaponLogic
 
     private void Shot(PlayerInputs playerInputs)
     {
-        //lastAimTime = Time.time;
-
-        weapon.currentAmmo--;
+        weapon.WasteAmmo();
 
         if (!NetworkRepository.Current.IsServer)
             return;
@@ -142,25 +167,35 @@ public class GunWeaponLogic : IWeaponLogic
 
     public bool NeedReload()
     {
-        return weapon.currentAmmo <= 0;
+        return weapon.CurrentAmmo <= 0;
     }
 
     public void OnReload()
     {
-        weapon.currentAmmo = weaponModel.ammoCapacity;
+        weapon.Reload();
     }
 
     public void OnShowVisual()
     {
         var camera = Camera.main;
 
+
         if (!Physics.Raycast(weapon.weaponObject.muzzle.position, player.Direction, out var hit, weapon.weaponModel.range))
+        {
+            GameBus.OnBulletFX?.Invoke(new BulletFX
+            {
+                StartPosition = weapon.weaponObject.muzzle.position,
+                EndPosition = weapon.weaponObject.muzzle.position + player.Direction * weapon.weaponModel.range
+            });
             return;
+        }
+
 
         GameBus.OnBulletFX?.Invoke(new BulletFX
         {
             StartPosition = weapon.weaponObject.muzzle.position,
-            EndPosition = hit.point
+            EndPosition = hit.point,
+            HitNormal = hit.normal
         });
     }
 }

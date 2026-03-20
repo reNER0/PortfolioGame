@@ -12,16 +12,27 @@ public class MeleeWeaponLogic : IWeaponLogic
 
     public void Attack(PlayerInputs playerInputs)
     {
+        bool fireHeld = playerInputs.Fire;
+        bool aimHeld = playerInputs.Aim;
+        bool attacking = player.PlayerStateMachine.currentState.GetType() == typeof(PlayerAttackState);
+
+        if (attacking)
+        {
+            if (player.WeaponController.IsAiming)
+                player.WeaponController.Aim(false);
+            return;
+        }
+
+
+        if (!fireHeld)
+        {
+            if (aimHeld != player.WeaponController.IsAiming)
+                player.WeaponController.Aim(aimHeld);
+            return;
+        }
+
         var direction = Tools.DirectionFromYawPitch(playerInputs.Yaw, playerInputs.Pitch);
         direction.y = 0;
-
-        bool fireHeld = playerInputs.Fire;
-
-        if (!playerInputs.Fire)
-            return;
-
-        if (player.PlayerStateMachine.currentState.GetType() == typeof(PlayerAttackState))
-            return;
 
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         player.Rigidbody.MoveRotation(targetRotation);

@@ -13,6 +13,7 @@ public class PlayerDeadState : PlayerState
     {
         _player.Rigidbody.constraints = RigidbodyConstraints.None;
 
+        _player.Animator.SetLayerWeight(1, 0);
         _player.Animator.SetTrigger("Dead");
     }
 

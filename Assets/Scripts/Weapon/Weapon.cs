@@ -1,4 +1,5 @@
 using Assets.Scripts.Weapon;
+using System;
 
 public abstract class Weapon
 {
@@ -15,12 +16,30 @@ public abstract class Weapon
 
 public class GunWeapon : Weapon
 {
-    public int currentAmmo;
+    public event Action<int> OnAmmo;
+    public int CurrentAmmo { get; private set; }
 
     public GunWeapon(GunModel weaponModel, WeaponPrefab weaponPrefab, Player player) : base(weaponModel, weaponPrefab)
     {
-        this.currentAmmo = weaponModel.ammoCapacity;
+        this.CurrentAmmo = weaponModel.ammoCapacity;
         weaponLogic = new GunWeaponLogic(this, weaponModel, player);
+    }
+
+    public bool CanShoot() 
+    {
+        return CurrentAmmo > 0;
+    }
+
+    public void WasteAmmo() 
+    {
+        CurrentAmmo--;
+        OnAmmo?.Invoke(CurrentAmmo);
+    }
+
+    public void Reload()
+    {
+        CurrentAmmo = ((GunModel)weaponModel).ammoCapacity;
+        OnAmmo?.Invoke(CurrentAmmo);
     }
 }
 

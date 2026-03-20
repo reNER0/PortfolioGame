@@ -57,7 +57,9 @@ public class MainState : State
 
     private void SpawnPlayer(NetworkClient client)
     {
-        var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(NetworkRepository.Current.CurrentCliendId);
+        var clientId = client != null ? client.ClientId : -1;
+
+        var spawnTransform = SpawnController.Instance.GetSpawnByPlayerId(clientId);
 
         if (spawnTransform == null)
         {
@@ -68,11 +70,6 @@ public class MainState : State
         var spawnPlayerCmd = new SpawnCmd(playerObjectName, spawnTransform.position, spawnTransform.rotation);
 
         NetworkBus.OnPerformCommand?.Invoke(spawnPlayerCmd);
-
-        int clientId = -1;
-
-        if (client != null)
-            clientId = client.ClientId;
 
         var setPlayerObjectCmd = new SetPlayerObjectCmd(clientId, NetworkRepository.Current.NetworkObjectById.Last().Id);
 
