@@ -128,7 +128,9 @@ public class Player : PhysicsObject, IDamagable, IHealth
         if (PlayerStateMachine.currentState.GetType() == typeof(PlayerDrivingState))
             return;
 
-        var serverState = lastServerState as PlayerSyncState;
+        //var serverState = lastServerState as RigidbodyState;
+        var interpolateTick = NetworkTime.CurrentTick - NetworkSettings.MaximumPingInTicks;
+        var serverState = ServerStates.FirstOrDefault(x => x != null && x.Tick == interpolateTick) as PlayerSyncState;
 
         if (serverState == null)
         {
@@ -157,7 +159,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
         serverStateTransform.rotation = serverState.Rotation;
 
 
-        var localState = States.FirstOrDefault(x => x?.Tick == serverState.Tick);
+        var localState = LocalStates.FirstOrDefault(x => x?.Tick == serverState.Tick);
 
         if (localState == null)
         {
