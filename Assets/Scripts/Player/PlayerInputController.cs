@@ -143,6 +143,9 @@ public class PlayerInputController : MonoBehaviour
         if (player == null)
             return;
 
+        if (player.GetHealth() == 0)
+            return;
+
         var direction = player.transform.forward;
 
         bool shooting = targetPlayer != null && player.WeaponController.Weapon != null;
@@ -219,7 +222,7 @@ public class PlayerInputController : MonoBehaviour
         // Random shoot
         if (Random.Range(0, 1f) > 0.5f)
         {
-            var players = FindObjectsOfType<Player>().Where(x => x != player).ToArray();
+            var players = FindObjectsOfType<Player>().Where(x => x != player).Where(x => x.GetHealth() > 0).ToArray();
             targetPlayer = players[Random.Range(0, players.Length - 1)];
         }
         else

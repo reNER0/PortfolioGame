@@ -85,7 +85,7 @@ public class WeaponController : MonoBehaviour
         if (isPreparing)
             return;
 
-        if (Weapon.weaponLogic.NeedReload() && NetworkRepository.Current.IsCurrentClientOwnerOfObject(GetComponent<Predictable>()))
+        if (Weapon.weaponLogic.NeedReload() && NetworkRepository.Current.IsCurrentClientOwnerOfObject(GetComponent<Predictable>()) && !isReloading)
         {
             OnReload();
         }

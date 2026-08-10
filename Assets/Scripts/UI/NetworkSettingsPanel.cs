@@ -3,12 +3,20 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static System.Net.Mime.MediaTypeNames;
 
 
 public class NetworkSettingsPanel : MonoBehaviour
 {
     [SerializeField]
     private TMP_InputField maximumErrorInputField;
+    [SerializeField]
+    private TMP_InputField additivePingInputField;
+    [SerializeField]
+    private TMP_InputField additiveJitterInputField;
+
+    [SerializeField]
+    private Toggle showServerStatesToggle;
 
     [SerializeField]
     private Slider syncForceSlider;
@@ -27,8 +35,17 @@ public class NetworkSettingsPanel : MonoBehaviour
         maximumErrorInputField.text = NetworkSettings.MaximumError.ToString();
         maximumErrorInputField.onValueChanged.AddListener(OnMaximumErrorInputField);
 
+        additivePingInputField.text = NetworkSettings.AdditivePing.ToString();
+        additivePingInputField.onValueChanged.AddListener(OnAdditivePingInputField);
+
+        additiveJitterInputField.text = NetworkSettings.AdditiveJitter.ToString();
+        additiveJitterInputField.onValueChanged.AddListener(OnAdditiveJitterInputField);
+
         syncForceSlider.SetValueWithoutNotify(NetworkSettings.SyncForce);
         syncForceSlider.onValueChanged.AddListener(OnSyncForceInputField);
+
+        showServerStatesToggle.SetIsOnWithoutNotify(NetworkSettings.ShowServerStates);
+        showServerStatesToggle.onValueChanged.AddListener(OnShowServerStatesToggle);
     }
 
 
@@ -66,6 +83,28 @@ public class NetworkSettingsPanel : MonoBehaviour
             return;
 
         NetworkSettings.MaximumError = maximumError;
+    }
+
+    private void OnAdditivePingInputField(string input)
+    {
+        if (!int.TryParse(input, out int additivePing))
+            return;
+
+        NetworkSettings.AdditivePing = additivePing;
+    }
+
+    private void OnAdditiveJitterInputField(string input)
+    {
+        if (!int.TryParse(input, out int additiveJitter))
+            return;
+
+        NetworkSettings.AdditiveJitter = additiveJitter;
+    }
+
+    private void OnShowServerStatesToggle(bool isOn)
+    {
+        NetworkSettings.ShowServerStates = isOn;
+        NetworkBus.OnShowServerStates?.Invoke(isOn);
     }
 
     private void OnSyncForceInputField(float input)

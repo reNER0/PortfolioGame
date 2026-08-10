@@ -16,7 +16,12 @@ public class KillPlayerCmd : SerializableClass, ICommand
 
     public void Execute()
     {
-        var player = (Player)NetworkRepository.Current.NetworkObjectById.First(x => x.Id == _playerObjectId).Predictable;
+        var networkObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == _playerObjectId);
+
+        if (networkObject == null)
+            return;
+
+        var player = (Player)networkObject.Predictable;
 
         if (NetworkRepository.Current.IsServer)
                 NetworkBus.OnCommandSendToClients(this);
