@@ -8,6 +8,7 @@ using UnityEngine;
 
 public class Player : PhysicsObject, IDamagable, IHealth
 {
+    public PlayerSound PlayerSound { get; private set; }
     public WeaponController WeaponController { get; private set; }
     public PlayerStateMachine PlayerStateMachine { get; private set; }
     public Animator Animator { get; private set; }
@@ -70,6 +71,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
         PlayerStateMachine.ChangeState(new PlayerWalkingState(this, 0));
 
         WeaponController = GetComponent<WeaponController>();
+        PlayerSound = GetComponent<PlayerSound>();
     }
 
 

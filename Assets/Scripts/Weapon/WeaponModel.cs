@@ -22,4 +22,6 @@ public abstract class WeaponModel : ScriptableObject
     public float range = 100;
     public float fireRate;
     public bool isTwoHanded;
+
+    public AudioClip attackSound;
 }

@@ -9,7 +9,7 @@ public class ChatPanel : MonoBehaviour
     [SerializeField]
     private ChatElement chatElement;
 
-    private void Start()
+    private void Awake()
     {
         UIBus.OnChatMessage += OnMessage;
         inputField.onSubmit.AddListener(OnInputField);

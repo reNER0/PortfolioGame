@@ -17,6 +17,7 @@ MonoBehaviour:
   range: 100
   fireRate: 0.1
   isTwoHanded: 1
+  attackSound: {fileID: 8300000, guid: 535793a54c13e0b4ab5c6fef5a59aca7, type: 3}
   bulletsPerShot: 1
   spread: 10
   ammoCapacity: 30

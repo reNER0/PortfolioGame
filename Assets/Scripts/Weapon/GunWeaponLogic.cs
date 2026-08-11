@@ -179,6 +179,7 @@ public class GunWeaponLogic : IWeaponLogic
     {
         var camera = Camera.main;
 
+        player.PlayerSound.PlayGunSound(weapon.weaponModel.attackSound);
 
         if (!Physics.Raycast(weapon.weaponObject.muzzle.position, player.Direction, out var hit, weapon.weaponModel.range))
         {

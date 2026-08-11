@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 public class MatchmakingClient : MonoBehaviour
 {
     [Header("ASP Server")]
-    [SerializeField] private string baseUrl = "https://localhost:7270/";
+    [SerializeField] private string baseUrl = "http://95.105.7.90:7001/";
     [SerializeField] private float pollIntervalSeconds = 0.5f;
 
     public event Action<string> StatusChanged;               // "Queued", "Matched", ...
@@ -34,6 +34,8 @@ public class MatchmakingClient : MonoBehaviour
 
     private IEnumerator JoinAndPoll()
     {
+        OnLog("Started searching match");
+
         // 1) Join (POST /queue/join)
         var joinUrl = $"{baseUrl.TrimEnd('/')}/queue/join";
 
@@ -42,6 +44,7 @@ public class MatchmakingClient : MonoBehaviour
             req.uploadHandler = new UploadHandlerRaw(Array.Empty<byte>());
             req.downloadHandler = new DownloadHandlerBuffer(); // ВАЖНО
             req.SetRequestHeader("Content-Type", "application/json");
+            req.timeout = 5;
 
             yield return req.SendWebRequest();
 
@@ -116,6 +119,7 @@ public class MatchmakingClient : MonoBehaviour
 
                     MatchFound?.Invoke(status.connect, status.matchId);
                     Debug.Log($"[MM] Match found! Connecting to {status.connect.ip}:{status.connect.port}");
+                    OnLog("Match found!");
 
                     NetworkSettings.ServerIP = status.connect.ip;
                     NetworkSettings.ServerPort = status.connect.port;
@@ -131,7 +135,17 @@ public class MatchmakingClient : MonoBehaviour
     private void Fail(string msg)
     {
         Debug.LogError(msg);
+        OnLog(msg);
         Error?.Invoke(msg);
         StopMatchmaking();
+    }
+
+    private void OnLog(string log) 
+    {
+        UIBus.OnChatMessage?.Invoke(new ChatMessage()
+        {
+            sender = "Matchmaker",
+            text = log
+        });
     }
 }
