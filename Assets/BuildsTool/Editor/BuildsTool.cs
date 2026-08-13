@@ -26,6 +26,14 @@ public static class BuildTool
     public static void BuildServerWindowsHeadlessDev()
         => BuildServer(BuildTarget.StandaloneWindows64, Path.Combine(serverOutDir, "Windows", "ServerBuild.exe"));
 
+    [MenuItem("Build/Linux_Client")]
+    public static void BuildClientLinuxDev()
+        => BuildClient(BuildTarget.StandaloneLinux64, Path.Combine(clientOutDir, "Linux", "ClientBuild.x86_64"));
+
+    [MenuItem("Build/Linux_Server")]
+    public static void BuildServerLinuxHeadlessDev()
+        => BuildServer(BuildTarget.StandaloneLinux64, Path.Combine(serverOutDir, "Linux", "ServerBuild.x86_64"));
+
     private static void BuildClient(BuildTarget target, string outPath)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
