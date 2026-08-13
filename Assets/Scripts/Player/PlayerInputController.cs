@@ -144,9 +144,12 @@ public class PlayerInputController : MonoBehaviour
             return;
 
         if (player.GetHealth() == 0)
+        {
+            Application.Quit(0);
             return;
-
-        var direction = player.transform.forward;
+        }
+            
+            var direction = player.transform.forward;
 
         bool shooting = targetPlayer != null && player.WeaponController.Weapon != null;
 
@@ -193,6 +196,7 @@ public class PlayerInputController : MonoBehaviour
         }
 
         player.SaveCurrentState(NetworkTime.CurrentTick);
+        player.lastAppliedInputs = input;
         NetworkBus.OnAllStatesSaved?.Invoke(NetworkTime.CurrentTick);
     }
 

@@ -112,7 +112,6 @@ public class Player : PhysicsObject, IDamagable, IHealth
             Rigidbody.velocity,
             Rigidbody.rotation,
             Rigidbody.angularVelocity,
-            lastAppliedInputs,
             health,
             yaw,
             pitch
@@ -131,8 +130,8 @@ public class Player : PhysicsObject, IDamagable, IHealth
             return;
 
         //var serverState = lastServerState as RigidbodyState;
-        var interpolateTick = NetworkTime.CurrentTick - NetworkSettings.MaximumPingInTicks;
-        var serverState = ServerStates.FirstOrDefault(x => x != null && x.Tick == interpolateTick) as PlayerSyncState;
+        var interpolateTick = NetworkTime.CurrentTick - Mathf.RoundToInt(NetworkSettings.MaximumPingInTicks * 2f);
+        var serverState = GetServerStateAtTick<PlayerSyncState>(interpolateTick);
 
         if (serverState == null)
         {

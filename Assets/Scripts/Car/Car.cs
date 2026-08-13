@@ -176,8 +176,8 @@ public class Car : PhysicsObject
     protected override void FixedUpdate()
     {
         //var serverState = lastServerState as RigidbodyState;
-        var interpolateTick = NetworkTime.CurrentTick - NetworkSettings.MaximumPingInTicks;
-        var serverState = ServerStates.FirstOrDefault(x => x != null && x.Tick == interpolateTick) as RigidbodyState;
+        var interpolateTick = NetworkTime.CurrentTick - Mathf.RoundToInt(NetworkSettings.MaximumPingInTicks * 2f);
+        var serverState = GetServerStateAtTick<RigidbodyState>(interpolateTick);
 
         if (serverState == null)
         {
