@@ -47,4 +47,9 @@ public class ShotCmd : SerializableClass, ICommand
 
         NetworkBus.OnCommandSendToServer?.Invoke(this);
     }
+
+    public override string ToString()
+    {
+        return $"ShotCmd: tick={_tick}, origin={_origin}, direction={_direction}";
+    }
 }

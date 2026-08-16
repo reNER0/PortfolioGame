@@ -23,5 +23,10 @@ namespace Assets.Scripts.Network.Commands
 
             player.WeaponController.OnReload();
         }
+
+        public override string ToString()
+        {
+            return $"StartReloadingCmd: senderId={senderId}";
+        }
     }
 }

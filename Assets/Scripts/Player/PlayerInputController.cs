@@ -7,7 +7,6 @@ using UnityEngine.InputSystem;
 public class PlayerInputController : MonoBehaviour
 {
     public static NewInputSystem inputSystem { get; private set; }
-    public static int previewTick { get; private set; }
     
     private bool jump;
 
@@ -36,13 +35,6 @@ public class PlayerInputController : MonoBehaviour
     private void OnDestroy()
     {
         inputSystem.Inputs.Jump.performed -= OnJump;
-    }
-
-
-    // Only on setup client
-    public static void SetPreviewTick(int tick)
-    {
-        previewTick = tick;
     }
 
     private void FixedUpdate()

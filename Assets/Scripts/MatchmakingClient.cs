@@ -39,6 +39,11 @@ public class MatchmakingClient : MonoBehaviour
         // 1) Join (POST /queue/join)
         var joinUrl = $"{baseUrl.TrimEnd('/')}/queue/join";
 
+        if (LaunchFlags.IsBot && !string.IsNullOrWhiteSpace(LaunchFlags.BotReservationId))
+        {
+            joinUrl += $"?botReservationId={UnityWebRequest.EscapeURL(LaunchFlags.BotReservationId)}";
+        }
+
         using (var req = new UnityWebRequest(joinUrl, UnityWebRequest.kHttpVerbPOST))
         {
             req.uploadHandler = new UploadHandlerRaw(Array.Empty<byte>());
@@ -138,6 +143,9 @@ public class MatchmakingClient : MonoBehaviour
         OnLog(msg);
         Error?.Invoke(msg);
         StopMatchmaking();
+
+        if (LaunchFlags.IsBot)
+            Application.Quit();
     }
 
     private void OnLog(string log) 

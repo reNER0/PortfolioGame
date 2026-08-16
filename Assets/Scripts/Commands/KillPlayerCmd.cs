@@ -30,4 +30,9 @@ public class KillPlayerCmd : SerializableClass, ICommand
 
         GameBus.OnPlayerDead?.Invoke(player);
     }
+
+    public override string ToString()
+    {
+        return $"KillPlayerCmd: playerObjectId={_playerObjectId}";
+    }
 }

@@ -52,4 +52,9 @@ public class LeaveCarCmd : SerializableClass, ICommand
         seat.SetPlayer(null);
         player.PlayerStateMachine.ChangeState(new PlayerWalkingState(player, 1/2f));
     }
+
+    public override string ToString()
+    {
+        return $"LeaveCarCmd: playerId={_playerId}, carId={_carId}, seatId={_seatId}";
+    }
 }

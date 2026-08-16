@@ -48,6 +48,8 @@ public class JumpInCarCmd : SerializableClass, ICommand
 
                 if (!canSeat)
                 {
+                    var messageCmd = new ChatMessageCmd("Too far to enter vehicle!");
+                    NetworkBus.OnCommandSendToClient?.Invoke(messageCmd, sender);
                     var leaveCarCmd = new LeaveCarCmd(_playerId, _carId, _seatId);
                     NetworkBus.OnCommandSendToClient?.Invoke(leaveCarCmd, sender);
                     return;
@@ -64,5 +66,10 @@ public class JumpInCarCmd : SerializableClass, ICommand
 
         seat.SetPlayer(player);
         player.PlayerStateMachine.ChangeState(new PlayerDrivingState(player, car, seat));
+    }
+
+    public override string ToString()
+    {
+        return $"JumpInCarCmd: playerId={_playerId}, carId={_carId}, seatId={_seatId}";
     }
 }

@@ -29,4 +29,9 @@ public class EquipWeaponCmd : SerializableClass, ICommand
         WeaponModel weaponModel = Resources.Load<WeaponModel>($"Weapons/{_weaponModelName}");
         player.WeaponController.PickupWeapon(weaponModel);
     }
+
+    public override string ToString()
+    {
+        return $"EquipWeaponCmd: playerId={_playerId}, weaponModelName={_weaponModelName}";
+    }
 }

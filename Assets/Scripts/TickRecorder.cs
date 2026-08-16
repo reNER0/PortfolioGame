@@ -13,7 +13,7 @@ public sealed class TickRecorder : MonoBehaviour
 
     private bool isServer;
 
-    private struct TickSample
+    public class TickSample
     {
         public int tick;
         public float time;
