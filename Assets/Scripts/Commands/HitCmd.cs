@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Assets.Scripts.Network.Commands;
 using UnityEngine;
 
@@ -20,12 +21,22 @@ public class HitCmd : SerializableClass, ICommand
     {
         bool youWasHit = NetworkRepository.Current.CurrentObjectId == _hitObjectId;
 
-        if (youWasHit) 
+        if (youWasHit)
         {
             GameBus.OnBadEffect?.Invoke();
             return;
         }
 
-        GameBus.OnPredictableHit?.Invoke(NetworkRepository.Current.NetworkObjectById[_hitObjectId].Predictable,_damage);
+        var networkObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == _hitObjectId);
+
+        if (networkObject == null)
+            return;
+
+        GameBus.OnPredictableHit?.Invoke(networkObject.Predictable, _damage);
+    }
+
+    public override string ToString()
+    {
+        return $"HitCmd: hitObjectId={_hitObjectId}, damage={_damage}";
     }
 }

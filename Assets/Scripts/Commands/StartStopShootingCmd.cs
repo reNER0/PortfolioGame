@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Network.Commands
@@ -7,21 +8,24 @@ namespace Assets.Scripts.Network.Commands
     public class StartStopShootingCmd : SerializableClass, ICommand
     {
         [SerializeField]
-        private int playerId;
+        private int playerObjectId;
         [SerializeField]
         private bool state;
 
-        public StartStopShootingCmd(int playerId, bool state)
+        public StartStopShootingCmd(int playerObjectId, bool state)
         {
-            this.playerId = playerId;
+            this.playerObjectId = playerObjectId;
             this.state = state;
         }
 
         public void Execute()
         {
-            var gameObject = NetworkRepository.Current.NetworkObjectById[playerId].Predictable;
+            var networkObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == playerObjectId);
 
-            var player = gameObject.GetComponent<Player>();
+            if (networkObject == null)
+                return;
+
+            var player = (Player)networkObject.Predictable;
 
             if (player == null)
                 return;
@@ -30,6 +34,11 @@ namespace Assets.Scripts.Network.Commands
                 player.WeaponController.OnStartShooting();
             else
                 player.WeaponController.OnStopShooting();
+        }
+
+        public override string ToString()
+        {
+            return $"StartStopShootingCmd: playerId={playerObjectId}, state={state}";
         }
     }
 }

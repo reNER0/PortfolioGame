@@ -21,7 +21,13 @@ public class BulletVisualsController : MonoBehaviour
         void OnHit()
         {
             Destroy(trail.gameObject, trail.time);
-            Instantiate(HitEffectPrefab, bulletFX.EndPosition, Quaternion.LookRotation(bulletFX.HitNormal));
+
+            var hitNormal = bulletFX.HitNormal;
+            var hitRotation = hitNormal.sqrMagnitude > 0.0001f
+                ? Quaternion.LookRotation(hitNormal)
+                : Quaternion.identity;
+
+            Instantiate(HitEffectPrefab, bulletFX.EndPosition, hitRotation);
         }
     }
 

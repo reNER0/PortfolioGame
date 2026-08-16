@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Network.Commands
@@ -7,7 +8,7 @@ namespace Assets.Scripts.Network.Commands
     public class SetPlayerAnimatorBoolCmd : SerializableClass, ICommand
     {
         [SerializeField]
-        private int playerId;
+        private int playerObjectId;
         [SerializeField]
         private string parameterName;
         [SerializeField]
@@ -15,21 +16,29 @@ namespace Assets.Scripts.Network.Commands
 
         public SetPlayerAnimatorBoolCmd(int playerId, string parameterName, bool state)
         {
-            this.playerId = playerId;
+            this.playerObjectId = playerId;
             this.parameterName = parameterName;
             this.state = state;
         }
 
         public void Execute()
         {
-            var gameObject = NetworkRepository.Current.NetworkObjectById[playerId].Predictable;
+            var networkObject = NetworkRepository.Current.NetworkObjectById.FirstOrDefault(x => x.Id == playerObjectId);
 
-            var player = gameObject.GetComponent<Player>();
+            if (networkObject == null)
+                return;
+
+            var player = (Player)networkObject.Predictable;
 
             if (player == null)
                 return;
 
             player.Animator.SetBool(parameterName, state);
+        }
+
+        public override string ToString()
+        {
+            return $"SetPlayerAnimatorBoolCmd: playerId={playerObjectId}, parameterName={parameterName}, state={state}";
         }
     }
 }
