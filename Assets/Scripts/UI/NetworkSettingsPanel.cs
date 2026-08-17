@@ -32,7 +32,7 @@ public class NetworkSettingsPanel : MonoBehaviour
     {
         SetupDropdowns();
 
-        maximumErrorInputField.text = NetworkSettings.MaximumError.ToString();
+        maximumErrorInputField.text = NetworkSettings.MaximumPositionError.ToString();
         maximumErrorInputField.onValueChanged.AddListener(OnMaximumErrorInputField);
 
         additivePingInputField.text = NetworkSettings.AdditivePing.ToString();
@@ -82,7 +82,7 @@ public class NetworkSettingsPanel : MonoBehaviour
         if (!int.TryParse(input, out int maximumError))
             return;
 
-        NetworkSettings.MaximumError = maximumError;
+        NetworkSettings.MaximumPositionError = maximumError;
     }
 
     private void OnAdditivePingInputField(string input)

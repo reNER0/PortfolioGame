@@ -175,7 +175,6 @@ public class Car : PhysicsObject
 
     protected override void FixedUpdate()
     {
-        //var serverState = lastServerState as RigidbodyState;
         var interpolateTick = NetworkTime.CurrentTick - Mathf.RoundToInt(NetworkSettings.MaximumPingInTicks * 2f);
         var serverState = GetServerStateAtTick<RigidbodyState>(interpolateTick);
 
@@ -186,17 +185,6 @@ public class Car : PhysicsObject
         }
 
         var driver = seats.FirstOrDefault().Player;
-
-        /*
-        if (driver == null || !NetworkRepository.Current.IsCurrentClientOwnerOfObject(driver))
-        {
-            Rigidbody.MovePosition(serverState.Position);
-            Rigidbody.MoveRotation(serverState.Rotation);
-            Rigidbody.velocity = serverState.Velocity;
-            Rigidbody.angularVelocity = serverState.RotationVelocity;
-            return;
-        }
-        */
 
         serverStateTransform.position = serverState.Position;
         serverStateTransform.rotation = serverState.Rotation;
@@ -213,7 +201,7 @@ public class Car : PhysicsObject
 
         var error = (serverState.Position - (localState as RigidbodyState).Position).magnitude;
 
-        if (error >= NetworkSettings.MaximumError)
+        if (error >= NetworkSettings.MaximumPositionError)
         {
             Reconcilate(serverState);
 

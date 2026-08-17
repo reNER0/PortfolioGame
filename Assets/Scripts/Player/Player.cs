@@ -171,7 +171,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
 
         var error = (serverState.Position - (localState as RigidbodyState).Position).magnitude;
 
-        if (error >= NetworkSettings.MaximumError)
+        if (error >= NetworkSettings.MaximumPositionError)
         {
             Reconcilate(serverState);
             return;
