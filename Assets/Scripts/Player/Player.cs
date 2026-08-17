@@ -130,7 +130,7 @@ public class Player : PhysicsObject, IDamagable, IHealth
             return;
 
         //var serverState = lastServerState as RigidbodyState;
-        var interpolateTick = NetworkTime.CurrentTick - Mathf.RoundToInt(NetworkSettings.MaximumPingInTicks * 2f);
+        var interpolateTick = AdaptiveInterpolation.Tick;
         var serverState = GetServerStateAtTick<PlayerSyncState>(interpolateTick);
 
         if (serverState == null)

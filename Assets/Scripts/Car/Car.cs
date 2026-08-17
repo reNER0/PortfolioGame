@@ -175,7 +175,7 @@ public class Car : PhysicsObject
 
     protected override void FixedUpdate()
     {
-        var interpolateTick = NetworkTime.CurrentTick - Mathf.RoundToInt(NetworkSettings.MaximumPingInTicks * 2f);
+        var interpolateTick = AdaptiveInterpolation.Tick;
         var serverState = GetServerStateAtTick<RigidbodyState>(interpolateTick);
 
         if (serverState == null)
