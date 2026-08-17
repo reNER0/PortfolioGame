@@ -50,8 +50,10 @@ public class JumpInCarCmd : SerializableClass, ICommand
                 {
                     var messageCmd = new ChatMessageCmd("Too far to enter vehicle!");
                     NetworkBus.OnCommandSendToClient?.Invoke(messageCmd, sender);
+
                     var leaveCarCmd = new LeaveCarCmd(_playerId, _carId, _seatId);
                     NetworkBus.OnCommandSendToClient?.Invoke(leaveCarCmd, sender);
+
                     return;
                 }
 

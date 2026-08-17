@@ -27,7 +27,7 @@ public sealed class TickRecorder : MonoBehaviour
     }
 
     /// <summary>
-    /// Вызывай ЭТО строго во время симуляции тика
+    /// Records a sample during tick simulation.
     /// </summary>
     public void RecordTick(int tickNumber)
     {
@@ -43,7 +43,7 @@ public sealed class TickRecorder : MonoBehaviour
     }
 
     /// <summary>
-    /// Можно вызвать вручную (например по кнопке)
+    /// Writes recorded samples to disk. This method can also be invoked manually.
     /// </summary>
     public void Save()
     {

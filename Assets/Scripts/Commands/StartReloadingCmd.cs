@@ -14,9 +14,13 @@ namespace Assets.Scripts.Network.Commands
             if (client == null)
                 return;
 
-            var gameObject = NetworkRepository.Current.NetworkObjectById[client.ClientObjectId].Predictable;
+            var networkObject = NetworkRepository.Current.NetworkObjectById
+                .FirstOrDefault(x => x.Id == client.ClientObjectId);
 
-            var player = gameObject.GetComponent<Player>();
+            if (networkObject?.Predictable == null)
+                return;
+
+            var player = networkObject.Predictable.GetComponent<Player>();
 
             if (player == null)
                 return;

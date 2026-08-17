@@ -48,6 +48,11 @@ public class WeaponController : MonoBehaviour
     }
     private void OnDestroy()
     {
+        OnStopShooting();
+
+        _layerTween?.Kill();
+        _layerTween = null;
+
         PlayerInputController.inputSystem.Inputs.Reload.performed -= OnReloadButton;
 
         PlayerAnimationEvents.OnReloadAnimationFinished -= OnReloadAnimationFinished;
@@ -57,7 +62,10 @@ public class WeaponController : MonoBehaviour
     public void PickupWeapon(WeaponModel weaponModel)
     {
         if (Weapon != null)
+        {
+            OnStopShooting();
             Destroy(Weapon.weaponObject.gameObject);
+        }
 
         var player = GetComponent<Player>();
         Weapon = WeaponFactory.CreateWeapon(player, weaponModel, WeaponSocket);
@@ -245,17 +253,22 @@ public class WeaponController : MonoBehaviour
     {
         OnStopShooting();
 
+        if (NetworkRepository.Current.IsServer || LaunchFlags.IsBot)
+            return;
+
         Weapon.weaponLogic.OnShowVisual();
 
         _shootTween = DOVirtual.DelayedCall(
                 Weapon.weaponModel.fireRate,
                 Weapon.weaponLogic.OnShowVisual)
             .SetLoops(-1, LoopType.Restart)
-            .SetUpdate(UpdateType.Normal);
+            .SetUpdate(UpdateType.Normal)
+            .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
     }
 
     public void OnStopShooting()
     {
         _shootTween?.Kill();
+        _shootTween = null;
     }
 }

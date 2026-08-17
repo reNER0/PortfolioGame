@@ -40,8 +40,8 @@ public class Wheel : MonoBehaviour
     float muY;
     public Vector3 fY;
 
-    private float driveTorqueInput;   // то, что приходит от мотора/коробки на это колесо (Н·м)
-    private float brakeTorqueInput;   // тормоз на это колесо (Н·м)
+    private float driveTorqueInput;   // Torque delivered to this wheel by the engine and transmission (N·m).
+    private float brakeTorqueInput;   // Braking torque applied to this wheel (N·m).
 
 
     public void Process()
@@ -130,7 +130,7 @@ public class Wheel : MonoBehaviour
         int substeps = 5;
         float subDT = Time.fixedDeltaTime / substeps;
 
-        // Нормальная реакция (лучше чем fZ.y, особенно на наклонах)
+        // Normal force (more accurate than fZ.y, especially on slopes).
         float N = Mathf.Max(0f, Vector3.Dot(fZ, hit.normal));
 
         float slipSpeedPeak = 4f;
@@ -139,30 +139,30 @@ public class Wheel : MonoBehaviour
         {
             float prevOmega = wheelAngularVelocity;
 
-            // 1) Slip и muY СНАЧАЛА, чтобы frictionTorque был актуален
+            // 1. Calculate slip and muY first so frictionTorque uses the current value.
             slipSpeed = wheelAngularVelocity - angularVelocityLocal.z;
             float s = Mathf.Clamp01(Mathf.Abs(slipSpeed) / slipSpeedPeak);
-            muY = s * Mathf.Sign(slipSpeed) * 1.2f; // то же самое что твой MapRangeClamped(0..peak->0..1)
+            muY = s * Mathf.Sign(slipSpeed) * 1.2f; // Equivalent to MapRangeClamped(0..peak -> 0..1).
 
-            // 2) момент от трансмиссии
+            // 2. Apply drivetrain torque.
             float driveTorque = driveTorqueInput;
 
-            // 3) тормозной момент ВСЕГДА против текущего вращения
-            // если ω ~ 0, тормоз не должен пытаться крутить назад
+            // 3. Apply braking torque opposite to the current rotation.
+            // Do not let braking torque reverse a nearly stationary wheel.
             float brakeTorque = 0f;
             if (Mathf.Abs(prevOmega) > 0.01f)
                 brakeTorque = brakeTorqueInput * Mathf.Sign(prevOmega);
 
-            // 4) момент от контакта с дорогой (через нормальную реакцию)
+            // 4. Calculate the road-contact torque from the normal force.
             float frictionTorque = muY * N * wheelRadius;
 
-            // 5) суммарный момент и интеграция
+            // 5. Integrate the total torque.
             totalTorque = driveTorque - frictionTorque - brakeTorque;
 
             float wheelAngularAcceleration = totalTorque / wheelInertia;
             wheelAngularVelocity += wheelAngularAcceleration * subDT;
 
-            // 6) не даём тормозу "перекрутить" колесо в обратную сторону
+            // 6. Prevent braking from reversing the wheel.
             if (Mathf.Abs(prevOmega) > 0.01f && Mathf.Sign(prevOmega) != Mathf.Sign(wheelAngularVelocity))
                 wheelAngularVelocity = 0f;
         }
@@ -181,7 +181,7 @@ public class Wheel : MonoBehaviour
 
     void ApplyFrictionForce()
     {
-        float N = Mathf.Max(0f, Vector3.Dot(fZ, hit.normal)); // вместо fZ.y
+        float N = Mathf.Max(0f, Vector3.Dot(fZ, hit.normal)); // Use the normal force instead of fZ.y.
 
         fX = lateralDir * (muX * grip) * N;
         fY = longitudinalDir * (muY * grip) * N;
@@ -222,7 +222,7 @@ public class Wheel : MonoBehaviour
 
     public float GetWheelSpeed()
     {
-        float linearSpeed = wheelAngularVelocity * wheelRadius; // м/с
+        float linearSpeed = wheelAngularVelocity * wheelRadius; // Meters per second.
         return linearSpeed;
     }
 

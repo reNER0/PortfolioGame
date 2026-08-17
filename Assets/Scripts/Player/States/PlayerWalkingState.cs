@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -54,6 +55,9 @@ public class PlayerWalkingState : PlayerStandingState
     public override void OnCollisionEnter(Collision collision)
     {
         if (!NetworkRepository.Current.IsCurrentClientOwnerOfObject(_player))
+            return;
+
+        if (LaunchFlags.IsBot)
             return;
 
         var car = collision.gameObject.GetComponent<Car>();

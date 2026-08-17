@@ -47,7 +47,7 @@ public class MatchmakingClient : MonoBehaviour
         using (var req = new UnityWebRequest(joinUrl, UnityWebRequest.kHttpVerbPOST))
         {
             req.uploadHandler = new UploadHandlerRaw(Array.Empty<byte>());
-            req.downloadHandler = new DownloadHandlerBuffer(); // ВАЖНО
+            req.downloadHandler = new DownloadHandlerBuffer(); // Required to read the response body.
             req.SetRequestHeader("Content-Type", "application/json");
             req.timeout = 5;
 
@@ -87,7 +87,7 @@ public class MatchmakingClient : MonoBehaviour
 
             using (var req = UnityWebRequest.Get(statusUrl))
             {
-                req.downloadHandler = new DownloadHandlerBuffer(); // ВАЖНО
+                req.downloadHandler = new DownloadHandlerBuffer(); // Required to read the response body.
 
                 yield return req.SendWebRequest();
 

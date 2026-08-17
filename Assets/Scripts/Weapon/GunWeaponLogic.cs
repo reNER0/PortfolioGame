@@ -74,7 +74,7 @@ public class GunWeaponLogic : IWeaponLogic
         // Shots simulation
         if (fireDown)
         {
-            Shot(playerInputs); // первый выстрел сразу
+            Shot(playerInputs); // Fire the first shot immediately.
         }
         else if (fireHeld)
         {
@@ -177,16 +177,21 @@ public class GunWeaponLogic : IWeaponLogic
 
     public void OnShowVisual()
     {
-        var camera = Camera.main;
+        if (player == null ||
+            weapon?.weaponObject == null ||
+            weapon.weaponObject.muzzle == null)
+            return;
+
+        var muzzle = weapon.weaponObject.muzzle;
 
         player.PlayerSound.PlayGunSound(weapon.weaponModel.attackSound);
 
-        if (!Physics.Raycast(weapon.weaponObject.muzzle.position, player.Direction, out var hit, weapon.weaponModel.range))
+        if (!Physics.Raycast(muzzle.position, player.Direction, out var hit, weapon.weaponModel.range))
         {
             GameBus.OnBulletFX?.Invoke(new BulletFX
             {
-                StartPosition = weapon.weaponObject.muzzle.position,
-                EndPosition = weapon.weaponObject.muzzle.position + player.Direction * weapon.weaponModel.range
+                StartPosition = muzzle.position,
+                EndPosition = muzzle.position + player.Direction * weapon.weaponModel.range
             });
             return;
         }
@@ -194,7 +199,7 @@ public class GunWeaponLogic : IWeaponLogic
 
         GameBus.OnBulletFX?.Invoke(new BulletFX
         {
-            StartPosition = weapon.weaponObject.muzzle.position,
+            StartPosition = muzzle.position,
             EndPosition = hit.point,
             HitNormal = hit.normal
         });
