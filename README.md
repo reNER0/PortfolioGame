@@ -25,6 +25,10 @@
   <img src="Docs/Media/car-gameplay.gif" alt="Networked vehicle physics gameplay" width="800">
 </p>
 
+## Live demo
+
+A remote lobby service and dedicated-server host are already running. Simply launch the game from the Unity Editor or a standalone client and join the matchmaking queue. The lobby will fill missing slots with bots and start a dedicated match automatically, so no local backend or server process is required.
+
 ## Overview
 
 This is an engineering-focused project built to explore the systems behind a real-time networked game instead of relying on a ready-made networking framework.
@@ -215,7 +219,7 @@ Clone the [MultiplayerLobbyServer](https://github.com/reNER0/MultiplayerLobbySer
     "ExecutablePath": "/opt/multiplayer-lobby/server/ServerBuild.x86_64",
     "PortMin": 7001,
     "PortMax": 7010,
-    "BindIp": "YOUR_PUBLIC_IP"
+    "BindIp": "31.76.10.223"
   },
   "BotSpawner": {
     "Enabled": true,
