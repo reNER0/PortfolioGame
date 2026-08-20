@@ -215,7 +215,7 @@ Clone the [MultiplayerLobbyServer](https://github.com/reNER0/MultiplayerLobbySer
     "ExecutablePath": "/opt/multiplayer-lobby/server/ServerBuild.x86_64",
     "PortMin": 7001,
     "PortMax": 7010,
-    "BindIp": "203.0.113.10"
+    "BindIp": "YOUR_PUBLIC_IP"
   },
   "BotSpawner": {
     "Enabled": true,
