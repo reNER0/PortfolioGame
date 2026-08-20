@@ -12,12 +12,15 @@ public class EscapeMenu : MonoBehaviour
     [SerializeField]
     private Button resumeButton;
 
+    public static bool IsOpen { get; private set; }
+
+
     private void Start()
     {
         resumeButton.onClick.AddListener(Show);
         PlayerInputController.inputSystem.Inputs.Escape.performed += Show;
 
-        gameObject.SetActive(false);
+        Show(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -37,11 +40,13 @@ public class EscapeMenu : MonoBehaviour
 
     private void Show()
     {
-        Show(!gameObject.activeSelf);
+        Show(!IsOpen);
     }
 
     private void Show(bool show)
     {
+        IsOpen = show;
+
         canvasGroup.DOKill();
 
         if (show)

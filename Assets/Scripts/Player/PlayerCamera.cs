@@ -47,6 +47,9 @@ public class PlayerCamera : Singleton<PlayerCamera>
         if (player == null)
             return;
 
+        if (EscapeMenu.IsOpen)
+            return;
+
         upperMount.localPosition = Vector3.up * height;
 
         if (!fixedState)

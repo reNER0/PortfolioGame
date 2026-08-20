@@ -15,6 +15,12 @@ public class DisconnectButton : MonoBehaviour
 
     private void OnDisconnect()
     {
+        if (NetworkRepository.Current.IsServer)
+        {
+            SceneLoader.LoadMainMenuScene();
+            return;
+        }
+
         NetworkBus.OnLocalClientDisconnected?.Invoke();
     }
 }
