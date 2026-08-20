@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 public class MatchmakingClient : MonoBehaviour
 {
     [Header("ASP Server")]
-    [SerializeField] private string baseUrl = "http://95.105.7.90:7001/";
+    [SerializeField] private string baseUrl = "http://localhost:7000/";
     [SerializeField] private float pollIntervalSeconds = 0.5f;
 
     public event Action<string> StatusChanged;               // "Queued", "Matched", ...
